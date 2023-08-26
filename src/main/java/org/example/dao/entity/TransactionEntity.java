@@ -1,23 +1,21 @@
 package org.example.dao.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder(setterPrefix = "set")
 public class TransactionEntity {
     private UUID id;
-    private CurrencyEntity currency;
-    private LocalDate date;
+    private String currency;
+    private LocalDateTime date;
     private AccountEntity accountFrom;
     private AccountEntity accountTo;
     private double sum;
-    private TransactionTypeEntity type;
+    private String type;
 }

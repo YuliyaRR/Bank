@@ -11,5 +11,9 @@ import org.example.core.dto.Currency;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class CurrencyEntity {
-    private Currency currency;
+    private String name;
+
+    public CurrencyEntity(Currency currency) {
+        this.name = currency.name();
+    }
 }
