@@ -63,7 +63,7 @@ public class AccountRepository implements IAccountRepository {
     @Override
     public AccountEntity updateBalance(UUID account, double sum) {
         AccountEntity.AccountEntityBuilder builder = AccountEntity.builder().setNum(account);
-        double balance = 0;
+        double balance;
 
         try(Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(CHECK_BEFORE_UPDATE_BALANCE));
@@ -72,7 +72,7 @@ public class AccountRepository implements IAccountRepository {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 balance = resultSet.getDouble("balance");
 
                 if(sum < 0) {
@@ -81,6 +81,9 @@ public class AccountRepository implements IAccountRepository {
 
                 String currency = resultSet.getString("name_currency");
                 builder.setCurrency(currency);
+
+            } else {
+                throw new RuntimeException("Account not found");//TODO custom exception
             }
 
             preparedStatement = connection.prepareStatement(properties.getProperty(UPDATE_BALANCE));
