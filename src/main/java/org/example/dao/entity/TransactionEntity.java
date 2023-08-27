@@ -14,8 +14,8 @@ public class TransactionEntity {
     private UUID id;
     private String currency;
     private LocalDateTime date;
-    private AccountEntity accountFrom;
-    private AccountEntity accountTo;
+    private UUID accountFrom;
+    private UUID accountTo;
     private double sum;
     private String type;
 }
