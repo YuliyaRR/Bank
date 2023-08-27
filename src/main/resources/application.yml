@@ -1,0 +1,10 @@
+driverDataSource: org.postgresql.Driver
+urlDB: jdbc:postgresql://localhost:5432/bank
+usernameDB:
+passwordDB:
+SQL_DOES_ACCOUNT_EXIST: SELECT num FROM app.accounts WHERE num = ?;
+SQL_DOES_ENOUGH_MONEY: SELECT num FROM app.accounts WHERE num = ? AND balance >= ?;
+SQL_CHECK_BEFORE_UPDATE_BALANCE: SELECT num, name_currency, balance FROM app.accounts WHERE num = ?;
+SQL_UPDATE_BALANCE: UPDATE app.accounts SET balance = ?, date_last_transaction = ? WHERE num = ?;
+SQL_SAVE_TRANSACTION: INSERT INTO app.transactions(id, name_transaction_type, name_currency, date) VALUES (?, ?, ?, ?);
+SQL_SAVE_ACCOUNT_TRANSACTION: INSERT INTO app.account_transaction(num_account, id_transaction, sum) VALUES (?, ?, ?);
