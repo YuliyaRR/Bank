@@ -13,6 +13,8 @@ repositories {
 dependencies {
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.5.1'
     implementation group: 'com.mchange', name: 'c3p0', version: '0.9.5.5'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.0'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
