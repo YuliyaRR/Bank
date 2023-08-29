@@ -1,8 +1,8 @@
-package org.example.dao.factory;
+package org.example.dao.repositories.factory;
 
-import org.example.dao.api.ITransactionRepository;
+import org.example.dao.repositories.api.ITransactionRepository;
 import org.example.dao.ds.factory.DataSourceC3POSingleton;
-import org.example.dao.impl.TransactionRepository;
+import org.example.dao.repositories.impl.TransactionRepository;
 
 import java.beans.PropertyVetoException;
 import java.util.Properties;

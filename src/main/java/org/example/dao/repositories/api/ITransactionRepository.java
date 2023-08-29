@@ -1,4 +1,4 @@
-package org.example.dao.api;
+package org.example.dao.repositories.api;
 
 import org.example.dao.entity.TransactionEntity;
 

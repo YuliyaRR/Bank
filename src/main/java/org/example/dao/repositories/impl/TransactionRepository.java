@@ -1,7 +1,7 @@
-package org.example.dao.impl;
+package org.example.dao.repositories.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dao.api.ITransactionRepository;
+import org.example.dao.repositories.api.ITransactionRepository;
 import org.example.dao.ds.api.IDataSourceWrapper;
 import org.example.dao.entity.TransactionEntity;
 
