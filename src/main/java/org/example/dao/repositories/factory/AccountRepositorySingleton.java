@@ -1,8 +1,9 @@
-package org.example.dao.factory;
+package org.example.dao.repositories.factory;
 
-import org.example.dao.api.IAccountRepository;
+import org.example.dao.repositories.api.IAccountRepository;
 import org.example.dao.ds.factory.DataSourceC3POSingleton;
-import org.example.dao.impl.AccountRepository;
+import org.example.dao.repositories.impl.AccountRepository;
+import org.example.listener.TransactionPublisher;
 
 import java.beans.PropertyVetoException;
 import java.util.Properties;
@@ -27,7 +28,7 @@ public class AccountRepositorySingleton {
         if (instance == null){
             synchronized (AccountRepositorySingleton.class){
                 if(instance == null) {
-                    instance = new AccountRepository(DataSourceC3POSingleton.getInstance(),properties);
+                    instance = new AccountRepository(DataSourceC3POSingleton.getInstance(), properties, new TransactionPublisher());
                 }
             }
         }
