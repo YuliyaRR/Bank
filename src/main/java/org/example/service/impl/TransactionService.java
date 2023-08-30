@@ -2,13 +2,12 @@ package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.core.dto.Transaction;
-import org.example.dao.api.ITransactionRepository;
+import org.example.dao.repositories.api.ITransactionRepository;
 import org.example.dao.entity.TransactionEntity;
 import org.example.service.api.ITransactionService;
 
 @RequiredArgsConstructor
 public class TransactionService implements ITransactionService {
-
     private final ITransactionRepository transactionRepository;
 
     @Override

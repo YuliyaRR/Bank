@@ -1,6 +1,6 @@
 package org.example.service.factory;
 
-import org.example.dao.factory.TransactionRepositorySingleton;
+import org.example.dao.repositories.factory.TransactionRepositorySingleton;
 import org.example.service.api.ITransactionService;
 import org.example.service.impl.TransactionService;
 

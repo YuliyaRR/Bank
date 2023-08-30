@@ -1,6 +1,6 @@
 package org.example.service.factory;
 
-import org.example.dao.factory.AccountRepositorySingleton;
+import org.example.dao.repositories.factory.AccountRepositorySingleton;
 import org.example.service.api.IAccountService;
 import org.example.service.impl.AccountService;
 
