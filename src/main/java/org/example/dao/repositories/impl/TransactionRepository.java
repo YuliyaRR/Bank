@@ -20,34 +20,45 @@ public class TransactionRepository implements ITransactionRepository {
     @Override
     public void save(TransactionEntity entity) {
         UUID id_transaction = entity.getId();
+
         try(Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(SAVE_TRANSACTION));
+            try {
+                connection.setAutoCommit(false);//transaction begin
 
-            preparedStatement.setObject(1, id_transaction);
-            preparedStatement.setString(2, entity.getType());
-            preparedStatement.setString(3, entity.getCurrency());
-            preparedStatement.setObject(4, entity.getDate());
+                PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(SAVE_TRANSACTION));
 
-            preparedStatement.executeUpdate();
+                preparedStatement.setObject(1, id_transaction);
+                preparedStatement.setString(2, entity.getType());
+                preparedStatement.setString(3, entity.getCurrency());
+                preparedStatement.setObject(4, entity.getDate());
 
-            double sum = Math.abs(entity.getSum());
-
-            preparedStatement = connection.prepareStatement(properties.getProperty(SAVE_ACCOUNT_TRANSACTION));
-            UUID accountFrom = entity.getAccountFrom();
-            UUID accountTo = entity.getAccountTo();
-
-            if(accountFrom != null) {
-                preparedStatement.setObject(1, accountFrom);
-                preparedStatement.setObject(2, id_transaction);
-                preparedStatement.setDouble(3, -sum);
                 preparedStatement.executeUpdate();
-            }
 
-            if(accountTo != null) {
-                preparedStatement.setObject(1, accountTo);
-                preparedStatement.setObject(2, id_transaction);
-                preparedStatement.setDouble(3, sum);
-                preparedStatement.executeUpdate();
+                double sum = Math.abs(entity.getSum());
+
+                preparedStatement = connection.prepareStatement(properties.getProperty(SAVE_ACCOUNT_TRANSACTION));
+                UUID accountFrom = entity.getAccountFrom();
+                UUID accountTo = entity.getAccountTo();
+
+                if (accountFrom != null) {
+                    preparedStatement.setObject(1, accountFrom);
+                    preparedStatement.setObject(2, id_transaction);
+                    preparedStatement.setDouble(3, -sum);
+                    preparedStatement.executeUpdate();
+                }
+
+                if (accountTo != null) {
+                    preparedStatement.setObject(1, accountTo);
+                    preparedStatement.setObject(2, id_transaction);
+                    preparedStatement.setDouble(3, sum);
+                    preparedStatement.executeUpdate();
+                }
+
+                connection.commit();//transaction end
+
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new RuntimeException("Something went wrong. Transaction commit error", e); //TODO custom exception
             }
 
         } catch (SQLException e) {
