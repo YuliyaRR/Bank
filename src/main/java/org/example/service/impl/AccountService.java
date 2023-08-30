@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.core.dto.Currency;
 import org.example.core.dto.Transaction;
 import org.example.core.dto.TransactionType;
-import org.example.dao.api.IAccountRepository;
 import org.example.dao.entity.AccountEntity;
+import org.example.dao.repositories.api.IAccountRepository;
 import org.example.service.api.IAccountService;
 import org.example.service.api.ITransactionService;
 
@@ -20,24 +20,25 @@ public class AccountService implements IAccountService {
      * Тип транзакции устанавливается в TransactionType.CASH_REPLENISHMENT.
      * @param accountTo  счет, на который будут зачислены денежные средства
      * @param sum  сумма к зачислению
+     * @param currency  валюта операции
      */
     @Override
-    public void addMoney(UUID accountTo, double sum) {
-        checkAccountExistence(accountTo);
+    public void addMoney(UUID accountTo, double sum, Currency currency) {
+        AccountEntity accountEntity = accountRepository.checkAccount(accountTo);
+        checkAccountCurrency(accountEntity, currency);
 
-        AccountEntity accountEntity = accountRepository.updateBalance(accountTo, sum);
         TransactionType transactionType = TransactionType.CASH_REPLENISHMENT;
 
         Transaction transaction = Transaction.builder()
                 .setId(UUID.randomUUID())
-                .setCurrency(Currency.valueOf(accountEntity.getCurrency()))
-                .setDate(accountEntity.getDateLastTransaction())
+                .setCurrency(currency)
                 .setAccountTo(accountTo)
                 .setSum(sum)
                 .setType(transactionType)
                 .build();
 
-        transactionService.saveTransaction(transaction);
+        accountRepository.updateBalanceCashOperation(transaction);
+
     }
 
     /**
@@ -45,27 +46,27 @@ public class AccountService implements IAccountService {
      * Тип транзакции устанавливается в TransactionType.WITHDRAWALS.
      * @param accountFrom  счет, с которого будут сняты денежные средства
      * @param sum сумма к списанию
+     * @param currency  валюта операции
      */
     @Override
-    public void withdrawalMoney(UUID accountFrom, double sum) {
-        checkAccountExistence(accountFrom);
-        checkAccountBalance(accountFrom, sum);
+    public void withdrawalMoney(UUID accountFrom, double sum, Currency currency) {
+        AccountEntity accountEntity = accountRepository.checkAccount(accountFrom);
+
+        checkAccountCurrency(accountEntity, currency);
+        checkAccountBalance(accountEntity, sum);
 
         sum = -sum;
-
-        AccountEntity accountEntity = accountRepository.updateBalance(accountFrom, sum);
         TransactionType transactionType = TransactionType.WITHDRAWALS;
 
         Transaction transaction = Transaction.builder()
                 .setId(UUID.randomUUID())
-                .setCurrency(Currency.valueOf(accountEntity.getCurrency()))
-                .setDate(accountEntity.getDateLastTransaction())
+                .setCurrency(currency)
                 .setAccountFrom(accountFrom)
                 .setSum(sum)
                 .setType(transactionType)
                 .build();
 
-        transactionService.saveTransaction(transaction);
+        accountRepository.updateBalanceCashOperation(transaction);
     }
 
     /**
@@ -73,28 +74,38 @@ public class AccountService implements IAccountService {
      * Поддерживаемые типы транзакций: TransactionType.WAGE, TransactionType.MONEY_TRANSFER, TransactionType.DEPOSIT_INTEREST,
      * TransactionType.PAYMENT_FOR_SERVICES
      * @param transaction объект, содержащий детали проводимой операции,
-     *                    в частности: счета, между которыми будет осуществлено списание/зачисление денежных средств,
-     *                    сумма операции, тип проводимой транзакции.
+     *                    в частности: - счета, между которыми будет осуществлено списание/зачисление денежных средств,
+     *                                 - сумма операции,
+     *                                 - тип проводимой транзакции,
+     *                                 - валюта операции
      */
     @Override
     public void transferMoney(Transaction transaction) {
+        Currency currency = transaction.getCurrency();
+        double sum = transaction.getSum();
         UUID accountFrom = transaction.getAccountFrom();
+        UUID accountTo = transaction.getAccountTo();
 
-        checkAccountExistence(accountFrom);
-        checkAccountExistence(transaction.getAccountTo());
+        AccountEntity accountEntityFrom = accountRepository.checkAccount(accountFrom);
+        checkAccountCurrency(accountEntityFrom, currency);
+        checkAccountBalance(accountEntityFrom, sum);
 
-        checkAccountBalance(accountFrom, transaction.getSum());
+        AccountEntity accountEntityTo = accountRepository.checkAccount(accountTo);
+        checkAccountCurrency(accountEntityTo, currency);
 
+        transaction.setId(UUID.randomUUID());
+
+        accountRepository.updateBalanceCashlessPayments(transaction);
     }
 
-    private void checkAccountExistence(UUID account) {
-        if (!accountRepository.doesExist(account)){
-            throw new RuntimeException("Account not found");//TODO custom exception
+    private void checkAccountCurrency(AccountEntity entity, Currency currency) {
+        if (!entity.getCurrency().equals(currency.name())){
+            throw new RuntimeException("Payment currency doesn't match with account currency");//TODO custom exception
         }
     }
 
-    private void checkAccountBalance(UUID account, double sum) {
-        if(!accountRepository.doesEnoughMoney(account, sum)) {
+    private void checkAccountBalance(AccountEntity accountEntity, double sum) {
+        if(accountEntity.getBalance() < sum) {
             throw new RuntimeException("You don't have enough money for this operation");//TODO custom exception
         }
     }
