@@ -19,10 +19,9 @@ public class AccountRepository implements IAccountRepository {
     private final Properties properties;
     private final IPublisher<TransactionEvent> publisher;
     private final static String CHECK_ACCOUNT = "SQL_CHECK_ACCOUNT";
-   // private final static String DOES_ENOUGH_MONEY = "SQL_DOES_ENOUGH_MONEY";
-   // private final static String CHECK_BEFORE_UPDATE_BALANCE = "SQL_CHECK_BEFORE_UPDATE_BALANCE";
-    private final static String UPDATE_BALANCE_WITH_CHECK = "SQL_UPDATE_BALANCE_WITH_CHECK";
-    private final static String UPDATE_BALANCE = "SQL_UPDATE_BALANCE";
+    private final static String CASH_UPDATE_BALANCE_WITH_CHECK = "SQL_CASH_UPDATE_BALANCE_WITH_CHECK";
+    private final static String CASH_UPDATE_BALANCE = "SQL_CASH_UPDATE_BALANCE";
+    private final static String CASHLESS_UPDATE_BALANCE = "SQL_CASHLESS_UPDATE_BALANCE";
 
     @Override
     public AccountEntity checkAccount(UUID account) {
@@ -47,28 +46,6 @@ public class AccountRepository implements IAccountRepository {
         }
     }
 
-    /*@Override
-    public boolean doesEnoughMoney(UUID account, double sum) {
-        boolean result = false;
-
-        try(Connection connection = dataSource.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(DOES_ENOUGH_MONEY))) {
-
-            preparedStatement.setObject(1, account);
-            preparedStatement.setDouble(2, sum);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                result = true;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Database connection error", e);// TODO custom exception
-        }
-
-        return result;
-    }*/
-
-
     /**
      * Метод обновляет баланс по счету клиента после пополнения наличными или снятия наличных со счета
      * @param transaction объект, содержащий детали проводимой операции
@@ -76,7 +53,7 @@ public class AccountRepository implements IAccountRepository {
     @Override
     public void updateBalanceCashOperation(Transaction transaction) {
         double sum = transaction.getSum();
-        UUID account = transaction.getAccountFrom();
+        UUID account;
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement;
@@ -84,9 +61,11 @@ public class AccountRepository implements IAccountRepository {
             connection.setAutoCommit(false);//transaction begin
 
             if (sum >= 0) {
-                preparedStatement = connection.prepareStatement(properties.getProperty(UPDATE_BALANCE));
+                account = transaction.getAccountTo();
+                preparedStatement = connection.prepareStatement(properties.getProperty(CASH_UPDATE_BALANCE));
             } else {
-                preparedStatement = connection.prepareStatement(properties.getProperty(UPDATE_BALANCE_WITH_CHECK));
+                account = transaction.getAccountFrom();
+                preparedStatement = connection.prepareStatement(properties.getProperty(CASH_UPDATE_BALANCE_WITH_CHECK));
                 preparedStatement.setDouble(4, sum);
             }
 
@@ -114,12 +93,42 @@ public class AccountRepository implements IAccountRepository {
 
     @Override
     public void updateBalanceCashlessPayments(Transaction transaction) {
+        UUID accountFrom = transaction.getAccountFrom();
+        UUID accountTo = transaction.getAccountTo();
+        double sum = transaction.getSum();
 
-    }
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(CASHLESS_UPDATE_BALANCE))) {
 
-    private void checkBalanceLimit(double balance, double sum) {
-        if (balance < Math.abs(sum)) {
-            throw new RuntimeException("You don't have enough money for this operation");//TODO custom exception
+            connection.setAutoCommit(false);//transaction begin
+
+            preparedStatement.setObject(1, accountFrom);
+            preparedStatement.setDouble(2, sum);
+            preparedStatement.setObject(3, accountTo);
+            preparedStatement.setDouble(4, sum);
+
+            LocalDateTime dateTime = LocalDateTime.now();
+
+            preparedStatement.setObject(5, dateTime);
+            preparedStatement.setDouble(6, sum);
+            preparedStatement.setObject(7, accountFrom);
+
+            preparedStatement.setObject(8, accountFrom);
+            preparedStatement.setObject(9, accountTo);
+
+            int update = preparedStatement.executeUpdate();
+
+            if (update < 2) {
+                connection.rollback();
+                throw new RuntimeException("Something went wrong. Check your balance and account and try again.");// TODO custom exception
+            } else {
+                transaction.setDate(dateTime);
+                publisher.notify(new TransactionEvent(transaction));
+                connection.commit();//transaction end
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Database connection error", e);// TODO custom exception
         }
     }
 }
