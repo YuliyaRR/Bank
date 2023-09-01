@@ -9,11 +9,15 @@ import org.example.dao.repositories.api.IAccountRepository;
 import org.example.service.api.IAccountService;
 import org.example.service.api.ITransactionService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 @RequiredArgsConstructor
 public class AccountService implements IAccountService {
     private final IAccountRepository accountRepository;
     private final ITransactionService transactionService;
+    private  boolean isItTimeToCalculateTheMonthlyInterest = false;
 
     /**
      * Метод предназначен для проведения операции по пополнению счета наличными.
@@ -96,6 +100,34 @@ public class AccountService implements IAccountService {
         transaction.setId(UUID.randomUUID());
 
         accountRepository.updateBalanceCashlessPayments(transaction);
+    }
+
+    @Override
+    public void checkTheNeedToCalculateInterest() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalTime localTime = now.toLocalTime();
+
+        LocalDate localDate = now.toLocalDate();
+        LocalTime expected = LocalTime.of(23, 59, 30);
+
+        int lengthOfMonth = localDate.lengthOfMonth();
+        int dayOfMonth = localDate.getDayOfMonth();
+
+        if(lengthOfMonth == dayOfMonth) {
+            if(localTime.equals(expected) || localTime.isAfter(expected)) {
+                if(!isItTimeToCalculateTheMonthlyInterest) {
+                    calculateInterest();
+                    isItTimeToCalculateTheMonthlyInterest = true;
+                }
+            }
+        } else {
+            isItTimeToCalculateTheMonthlyInterest = false;
+        }
+    }
+
+    @Override
+    public void calculateInterest() {
+        accountRepository.calculateMonthlyInterest();
     }
 
     private void checkAccountCurrency(AccountEntity entity, Currency currency) {
