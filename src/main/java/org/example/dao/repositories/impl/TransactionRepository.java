@@ -8,6 +8,7 @@ import org.example.dao.entity.TransactionEntity;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ public class TransactionRepository implements ITransactionRepository {
     private final static String SAVE_TRANSACTION = "SQL_SAVE_TRANSACTION";
     private final static String SAVE_ACCOUNT_TRANSACTION = "SQL_SAVE_ACCOUNT_TRANSACTION";
     @Override
-    public void save(TransactionEntity entity) {
+    public void saveTransaction(TransactionEntity entity) {
         UUID id_transaction = entity.getId();
 
         try(Connection connection = dataSource.getConnection()) {
@@ -53,6 +54,46 @@ public class TransactionRepository implements ITransactionRepository {
                     preparedStatement.setDouble(3, sum);
                     preparedStatement.executeUpdate();
                 }
+
+                connection.commit();//transaction end
+
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new RuntimeException("Something went wrong. Transaction commit error", e); //TODO custom exception
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Database connection error", e);//TODO custom exception
+        }
+    }
+
+    @Override
+    public void saveMonthlyInterestTransactions(List<TransactionEntity> entities) {
+        try(Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatementTransaction = connection.prepareStatement(properties.getProperty(SAVE_TRANSACTION));
+            PreparedStatement preparedStatementAccountTransaction = connection.prepareStatement(properties.getProperty(SAVE_ACCOUNT_TRANSACTION));) {
+            try {
+                connection.setAutoCommit(false);//transaction begin
+
+                for (TransactionEntity transaction : entities) {
+                    UUID id_transaction = transaction.getId();
+
+                    preparedStatementTransaction.setObject(1, id_transaction);
+                    preparedStatementTransaction.setString(2, transaction.getType());
+                    preparedStatementTransaction.setString(3, transaction.getCurrency());
+                    preparedStatementTransaction.setObject(4, transaction.getDate());
+
+                    preparedStatementTransaction.addBatch();
+
+                    preparedStatementAccountTransaction.setObject(1, transaction.getAccountTo());
+                    preparedStatementAccountTransaction.setObject(2, id_transaction);
+                    preparedStatementAccountTransaction.setDouble(3, transaction.getSum());
+
+                    preparedStatementAccountTransaction.addBatch();
+                }
+
+                preparedStatementTransaction.executeBatch();
+                preparedStatementAccountTransaction.executeBatch();
 
                 connection.commit();//transaction end
 
