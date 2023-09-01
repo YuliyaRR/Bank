@@ -9,4 +9,5 @@ public interface IAccountRepository {
     AccountEntity checkAccount(UUID account);
     void updateBalanceCashOperation(Transaction transaction);
     void updateBalanceCashlessPayments(Transaction transaction);
+    void calculateMonthlyInterest();
 }

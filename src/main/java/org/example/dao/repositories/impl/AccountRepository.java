@@ -1,17 +1,20 @@
 package org.example.dao.repositories.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.core.dto.Currency;
 import org.example.core.dto.Transaction;
+import org.example.core.dto.TransactionType;
 import org.example.core.events.TransactionEvent;
 import org.example.dao.entity.AccountEntity;
 import org.example.dao.repositories.api.IAccountRepository;
 import org.example.dao.ds.api.IDataSourceWrapper;
 import org.example.listener.IPublisher;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class AccountRepository implements IAccountRepository {
@@ -22,6 +25,10 @@ public class AccountRepository implements IAccountRepository {
     private final static String CASH_UPDATE_BALANCE_WITH_CHECK = "SQL_CASH_UPDATE_BALANCE_WITH_CHECK";
     private final static String CASH_UPDATE_BALANCE = "SQL_CASH_UPDATE_BALANCE";
     private final static String CASHLESS_UPDATE_BALANCE = "SQL_CASHLESS_UPDATE_BALANCE";
+    private final static String SELECT_ACCOUNTS_BEFORE_INTEREST_PAYMENT = "SQL_SELECT_ACCOUNTS_BEFORE_INTEREST_PAYMENT";
+    private final static String MONTHLY_INTEREST_PAYMENT = "SQL_MONTHLY_INTEREST_PAYMENT";
+    private final static String MONTHLY_INTEREST = "MONTHLY_INTEREST";
+    private final static String BANK_NAME = "BANK_NAME";
 
     @Override
     public AccountEntity checkAccount(UUID account) {
@@ -56,9 +63,9 @@ public class AccountRepository implements IAccountRepository {
         UUID account;
 
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement;
-
             connection.setAutoCommit(false);//transaction begin
+
+            PreparedStatement preparedStatement;
 
             if (sum >= 0) {
                 account = transaction.getAccountTo();
@@ -126,6 +133,68 @@ public class AccountRepository implements IAccountRepository {
                 publisher.notify(new TransactionEvent(transaction));
                 connection.commit();//transaction end
             }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Database connection error", e);// TODO custom exception
+        }
+    }
+
+    @Override
+    public void calculateMonthlyInterest() {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatementSelect = connection.prepareStatement(properties.getProperty(SELECT_ACCOUNTS_BEFORE_INTEREST_PAYMENT));
+             PreparedStatement preparedStatementUpdate = connection.prepareStatement(properties.getProperty(MONTHLY_INTEREST_PAYMENT))) {
+
+            List<Transaction> transactionList = new ArrayList<>();
+
+            try {
+                connection.setAutoCommit(false);//transaction begin
+
+                preparedStatementSelect.setString(1, properties.getProperty(BANK_NAME));
+                ResultSet resultSet = preparedStatementSelect.executeQuery();
+
+                LocalDateTime localDateTime = LocalDateTime.now();
+                TransactionType depositInterest = TransactionType.DEPOSIT_INTEREST;
+
+                Transaction.TransactionBuilder builder = Transaction.builder();
+                double interest;
+
+                while (resultSet.next()){
+                    UUID num = (UUID) resultSet.getObject("num");
+                    Currency currency = Currency.valueOf(resultSet.getString("name_currency"));
+                    double balance = resultSet.getDouble("balance");
+
+                    interest = BigDecimal.valueOf(balance * Double.parseDouble(properties.getProperty(MONTHLY_INTEREST)))
+                            .setScale(2, RoundingMode.HALF_UP).doubleValue();
+
+                    transactionList.add(
+                            builder.setId(UUID.randomUUID())
+                            .setCurrency(currency)
+                            .setDate(localDateTime)
+                            .setAccountTo(num)
+                            .setSum(interest)
+                            .setType(depositInterest)
+                            .build()
+                    );
+
+                    preparedStatementUpdate.setDouble(1, interest + balance);
+                    preparedStatementUpdate.setObject(2, localDateTime);
+                    preparedStatementUpdate.setObject(3, num);
+
+                    preparedStatementUpdate.addBatch();
+
+                }
+
+                preparedStatementUpdate.executeBatch();
+
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new RuntimeException("Something went wrong. Transaction commit error", e); //TODO custom exception
+            }
+
+            transactionList.forEach(transaction -> publisher.notify(new TransactionEvent(transaction)));
+
+            connection.commit();//transaction end
 
         } catch (SQLException e) {
             throw new RuntimeException("Database connection error", e);// TODO custom exception
