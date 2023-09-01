@@ -1,10 +1,19 @@
+# db settings
 driverDataSource: org.postgresql.Driver
 urlDB: jdbc:postgresql://localhost:5432/bank
 usernameDB:
 passwordDB:
+
+# constants
+MONTHLY_INTEREST: 0.01
+BANK_NAME: Clever-Bank
+
+# sql
 SQL_CHECK_ACCOUNT: SELECT balance, name_currency FROM app.accounts WHERE num = ?;
-SQL_DOES_ENOUGH_MONEY: SELECT num FROM app.accounts WHERE num = ? AND balance >= ?;
-SQL_UPDATE_BALANCE_WITH_CHECK: UPDATE app.accounts SET balance = balance + ?, date_last_transaction = ? WHERE num = ? AND balance >= ABS(?);
-SQL_UPDATE_BALANCE: UPDATE app.accounts SET balance = balance + ?, date_last_transaction = ? WHERE num = ?;
+SQL_CASH_UPDATE_BALANCE_WITH_CHECK: UPDATE app.accounts SET balance = balance + ?, date_last_transaction = ? WHERE num = ? AND balance >= ABS(?);
+SQL_CASH_UPDATE_BALANCE: UPDATE app.accounts SET balance = balance + ?, date_last_transaction = ? WHERE num = ?;
+SQL_CASHLESS_UPDATE_BALANCE: UPDATE app.accounts SET balance=CASE num WHEN ? THEN balance - ? WHEN ? THEN balance + ? END, date_last_transaction = ? WHERE ? <= (SELECT balance from app.accounts where num = ?) AND num IN (?, ?);
+SQL_SELECT_ACCOUNTS_BEFORE_INTEREST_PAYMENT: SELECT num, name_currency, balance FROM app.accounts WHERE id_bank = (SELECT id FROM app.banks WHERE name = ?);
+SQL_MONTHLY_INTEREST_PAYMENT: UPDATE app.accounts SET balance= ?, date_last_transaction = ? WHERE num = ?;
 SQL_SAVE_TRANSACTION: INSERT INTO app.transactions(id, name_transaction_type, name_currency, date) VALUES (?, ?, ?, ?);
 SQL_SAVE_ACCOUNT_TRANSACTION: INSERT INTO app.account_transaction(num_account, id_transaction, sum) VALUES (?, ?, ?);
