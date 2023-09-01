@@ -192,7 +192,11 @@ public class AccountRepository implements IAccountRepository {
                 throw new RuntimeException("Something went wrong. Transaction commit error", e); //TODO custom exception
             }
 
-            transactionList.forEach(transaction -> publisher.notify(new TransactionEvent(transaction)));
+            publisher.notify(
+                    transactionList.stream()
+                            .map(transaction -> new TransactionEvent(transaction))
+                            .toList()
+            );
 
             connection.commit();//transaction end
 
