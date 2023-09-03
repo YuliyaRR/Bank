@@ -1,6 +1,7 @@
-package org.example.listener;
+package org.example.listener.impl.transaction;
 
 import org.example.core.events.TransactionEvent;
+import org.example.listener.api.IListener;
 import org.example.service.api.ITransactionService;
 import org.example.service.factory.TransactionServiceSingleton;
 
