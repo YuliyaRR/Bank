@@ -1,8 +1,8 @@
 # db settings
 driverDataSource: org.postgresql.Driver
 urlDB: jdbc:postgresql://localhost:5432/bank
-usernameDB:
-passwordDB:
+usernameDB: postgres
+passwordDB: qaz741
 
 # constants
 MONTHLY_INTEREST: 0.01
@@ -20,4 +20,7 @@ SQL_SAVE_ACCOUNT_TRANSACTION: INSERT INTO app.account_transaction(num_account, i
 SQL_SELECT_BANK_BY_ACCOUNT: SELECT id, name FROM app.banks INNER JOIN app.accounts ON app.banks.id = app.accounts.id_bank WHERE num = ?;
 SQL_SELECT_ACCOUNT_BY_UUID: SELECT name_currency, id_bank, app.banks.name AS name_bank, date_open, balance, id_client, app.clients.name AS name_client, date_last_transaction FROM app.accounts INNER JOIN app.banks ON app.accounts.id_bank = app.banks.id INNER JOIN app.clients ON app.accounts.id_client = app.clients.id WHERE num = ?;
 SQL_SELECT_TRANSACTIONS_BY_ACCOUNT: SELECT date, name_transaction_type, sum FROM app.account_transaction INNER JOIN app.transactions ON app.account_transaction.id_transaction =app.transactions.id WHERE num_account = ? AND date BETWEEN ? AND ? ORDER BY date ASC;
-
+SQL_SELECT_ALL_BANKS: SELECT id, name FROM app.banks;
+SQL_INSERT_NEW_BANK: INSERT INTO app.banks(id, name) VALUES (?, ?);
+SQL_UPDATE_BANK: UPDATE app.banks SET name = ? WHERE id = ?;
+SQL_DELETE_BANK: DELETE FROM app.banks WHERE id = ?;
