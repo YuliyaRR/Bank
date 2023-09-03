@@ -1,6 +1,7 @@
 package org.example.service.factory;
 
 import org.example.dao.repositories.factory.AccountRepositorySingleton;
+import org.example.listener.impl.check.CheckPublisher;
 import org.example.service.api.IAccountService;
 import org.example.service.impl.AccountService;
 
@@ -19,7 +20,8 @@ public class AccountServiceSingleton {
                     try {
                         instance =  new AccountService(
                                 AccountRepositorySingleton.getInstance(),
-                                TransactionServiceSingleton.getInstance()
+                                BankServiceSingleton.getInstance(),
+                                new CheckPublisher()
                         );
                     }catch (PropertyVetoException e) {
                         throw new IllegalStateException(e);

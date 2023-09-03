@@ -1,13 +1,13 @@
 package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.core.dto.Currency;
-import org.example.core.dto.Transaction;
-import org.example.core.dto.TransactionType;
+import org.example.core.dto.*;
+import org.example.core.events.CheckEvent;
 import org.example.dao.entity.AccountEntity;
 import org.example.dao.repositories.api.IAccountRepository;
+import org.example.listener.api.IPublisher;
 import org.example.service.api.IAccountService;
-import org.example.service.api.ITransactionService;
+import org.example.service.api.IBankService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,67 +16,85 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccountService implements IAccountService {
     private final IAccountRepository accountRepository;
-    private final ITransactionService transactionService;
+    private final IBankService bankService;
+    private final IPublisher<CheckEvent> publisher;
     private  boolean isItTimeToCalculateTheMonthlyInterest = false;
 
+
     /**
-     * Метод предназначен для проведения операции по пополнению счета наличными.
-     * Тип транзакции устанавливается в TransactionType.CASH_REPLENISHMENT.
-     * @param accountTo  счет, на который будут зачислены денежные средства
-     * @param sum  сумма к зачислению
-     * @param currency  валюта операции
+     * Метод предназначен для проведения операции по пополнению счета наличными
+     * и работает над операциями типа TransactionType.CASH_REPLENISHMENT
+     * @param transaction объект, содержащий детали проводимой операции,
+     *                    в частности: - счет, на который будут зачислены денежные средства,
+     *                                 - сумма к зачислению,
+     *                                 - тип проводимой транзакции,
+     *                                 - валюта операции
+     * @return объект Check, содержащий информацию о проведенной операции
      */
     @Override
-    public void addMoney(UUID accountTo, double sum, Currency currency) {
+    public Check addMoney(Transaction transaction) {
+        if (!transaction.getType().equals(TransactionType.CASH_REPLENISHMENT)){
+            throw new RuntimeException("Transaction type doesn't match the operation being performed");//TODO custom exception
+        }
+
+        UUID accountTo = transaction.getAccountTo();
         AccountEntity accountEntity = accountRepository.checkAccount(accountTo);
+
+        Currency currency = transaction.getCurrency();
         checkAccountCurrency(accountEntity, currency);
 
-        TransactionType transactionType = TransactionType.CASH_REPLENISHMENT;
+        transaction.setId(UUID.randomUUID());
 
-        Transaction transaction = Transaction.builder()
-                .setId(UUID.randomUUID())
-                .setCurrency(currency)
-                .setAccountTo(accountTo)
-                .setSum(sum)
-                .setType(transactionType)
-                .build();
+        Check check = convertTransactionToCheck(accountRepository.updateBalanceCashOperation(transaction));
 
-        accountRepository.updateBalanceCashOperation(transaction);
+        publisher.notify(new CheckEvent(check));
 
+        check.setBankFrom(null);
+
+        return check;
     }
 
     /**
-     * Метод предназначен проведения операции по снятию денежных средств со счета.
-     * Тип транзакции устанавливается в TransactionType.WITHDRAWALS.
-     * @param accountFrom  счет, с которого будут сняты денежные средства
-     * @param sum сумма к списанию
-     * @param currency  валюта операции
+     * Метод предназначен для проведения операции по снятию денежных средств со счета
+     * и работает над операциями типа TransactionType.WITHDRAWALS
+     * @param transaction объект, содержащий детали проводимой операции,
+     *                    в частности: - счет, с которого будут сняты денежные средства,
+     *                                 - сумма к списанию,
+     *                                 - тип проводимой транзакции,
+     *                                 - валюта операции
+     * @return объект Check, содержащий информацию о проведенной операции
      */
     @Override
-    public void withdrawalMoney(UUID accountFrom, double sum, Currency currency) {
+    public Check withdrawalMoney(Transaction transaction) {
+        if (!transaction.getType().equals(TransactionType.WITHDRAWALS)){
+            throw new RuntimeException("Transaction type doesn't match the operation being performed");//TODO custom exception
+        }
+
+        UUID accountFrom = transaction.getAccountFrom();
         AccountEntity accountEntity = accountRepository.checkAccount(accountFrom);
 
+        Currency currency = transaction.getCurrency();
         checkAccountCurrency(accountEntity, currency);
+
+        double sum = transaction.getSum();
         checkAccountBalance(accountEntity, sum);
 
-        sum = -sum;
-        TransactionType transactionType = TransactionType.WITHDRAWALS;
+        transaction.setSum(-sum);
 
-        Transaction transaction = Transaction.builder()
-                .setId(UUID.randomUUID())
-                .setCurrency(currency)
-                .setAccountFrom(accountFrom)
-                .setSum(sum)
-                .setType(transactionType)
-                .build();
+        transaction.setId(UUID.randomUUID());
 
-        accountRepository.updateBalanceCashOperation(transaction);
+        Check check = convertTransactionToCheck(accountRepository.updateBalanceCashOperation(transaction));
+
+        publisher.notify(new CheckEvent(check));
+
+        check.setBankTo(null);
+
+        return check;
     }
 
     /**
      * Метод предназначен для проведения операций между банковскими счетами, открытыми как в одном банке, так и в различных.
-     * Поддерживаемые типы транзакций: TransactionType.WAGE, TransactionType.MONEY_TRANSFER, TransactionType.DEPOSIT_INTEREST,
-     * TransactionType.PAYMENT_FOR_SERVICES
+     * Поддерживаемые типы транзакций: TransactionType.WAGE, TransactionType.MONEY_TRANSFER, TransactionType.PAYMENT_FOR_SERVICES
      * @param transaction объект, содержащий детали проводимой операции,
      *                    в частности: - счета, между которыми будет осуществлено списание/зачисление денежных средств,
      *                                 - сумма операции,
@@ -84,7 +102,12 @@ public class AccountService implements IAccountService {
      *                                 - валюта операции
      */
     @Override
-    public void transferMoney(Transaction transaction) {
+    public Check transferMoney(Transaction transaction) {
+        TransactionType type = transaction.getType();
+        if (!type.equals(TransactionType.WAGE) && !type.equals(TransactionType.MONEY_TRANSFER) && !type.equals(TransactionType.PAYMENT_FOR_SERVICES)){
+            throw new RuntimeException("Transaction type doesn't match the operation being performed");//TODO custom exception
+        }
+
         Currency currency = transaction.getCurrency();
         double sum = transaction.getSum();
         UUID accountFrom = transaction.getAccountFrom();
@@ -99,9 +122,17 @@ public class AccountService implements IAccountService {
 
         transaction.setId(UUID.randomUUID());
 
-        accountRepository.updateBalanceCashlessPayments(transaction);
+        Check check = convertTransactionToCheck(accountRepository.updateBalanceCashlessPayments(transaction));
+
+        publisher.notify(new CheckEvent(check));
+
+        return check;
     }
 
+    /**
+     * Метод проверяет необходимость начисления ежемесячных процентов.
+     * Пороговое время для начисления 23:59:30.
+     */
     @Override
     public void checkTheNeedToCalculateInterest() {
         LocalDateTime now = LocalDateTime.now();
@@ -125,20 +156,95 @@ public class AccountService implements IAccountService {
         }
     }
 
+    /**
+     * Метод обеспечивает начисление ежемесячных процентов
+     */
     @Override
     public void calculateInterest() {
         accountRepository.calculateMonthlyInterest();
     }
 
+
+    /**Метод предоставляет полную информацию по открытому счету
+     * @param account счет, по которому запрашивается информация
+     * @return - Account, содержит всю информацию по счету,
+     */
+    @Override
+    public Account getAccountInfo(UUID account) {
+        AccountEntity entity = accountRepository.getAccount(account);
+        return convertFromEntity(entity);
+    }
+
+    /** Метод проверяет, совпадает ли валюта платежа и валюта счета
+     * @param entity аккаунт, по которому будет совершен платеж
+     * @param currency валюта платежа
+     * В случае, если валюта счета и валюта платежа не совпадают, выбрасывается RuntimeException
+     */
     private void checkAccountCurrency(AccountEntity entity, Currency currency) {
         if (!entity.getCurrency().equals(currency.name())){
             throw new RuntimeException("Payment currency doesn't match with account currency");//TODO custom exception
         }
     }
 
+    /** Метод проверяет, достаточен ли баланс для совершения заданного платежа
+     * @param accountEntity аккаунт, по которому будет совершен платеж
+     * @param sum сумма платежа
+     * В случае, если баланс счета недостаточен, выбрасывается RuntimeException
+     */
     private void checkAccountBalance(AccountEntity accountEntity, double sum) {
         if(accountEntity.getBalance() < sum) {
             throw new RuntimeException("You don't have enough money for this operation");//TODO custom exception
         }
+    }
+
+    /**
+     * Метод конвертирует объект Transaction в объект Check
+     * @param transaction - объект-источник
+     * @return Check
+     */
+    private Check convertTransactionToCheck(Transaction transaction) {
+        UUID accountFrom = transaction.getAccountFrom();
+        UUID accountTo = transaction.getAccountTo();
+
+        Bank bankFrom = getBank(accountFrom);
+        Bank bankTo = getBank(accountTo);
+
+        return Check.builder()
+                .setNumber(transaction.getId())
+                .setLocalDateTime(transaction.getDate())
+                .setTransactionType(transaction.getType())
+                .setBankFrom(bankFrom)
+                .setBankTo(bankTo)
+                .setAccountFrom(accountFrom)
+                .setAccountTo(accountTo)
+                .setSum(Math.abs(transaction.getSum()))
+                .setCurrency(transaction.getCurrency())
+                .build();
+    }
+
+    /**
+     * Метод конвертирует объект AccountEntity в объект Account
+     * @param entity - объект-источник
+     * @return Account
+     */
+    private Account convertFromEntity(AccountEntity entity) {
+        return Account.builder()
+                .setNum(entity.getNum())
+                .setCurrency(Currency.valueOf(entity.getCurrency()))
+                .setBank(new Bank(entity.getBank().getId(), entity.getBank().getName()))
+                .setDateOpen(entity.getDateOpen())
+                .setDateLastTransaction(entity.getDateLastTransaction())
+                .setBalance(entity.getBalance())
+                .setOwner(new Client(entity.getOwner().getId(), entity.getOwner().getName()))
+                .build();
+    }
+
+    /**
+     * * Метод предоставляет информацию о банке, в котором открыт счет.
+     * @param account счет. Если поле == null, то возвращается объект-заглушка.
+     * @return Bank, содержит информацию о банке, в котором открыт счет
+     */
+    private Bank getBank(UUID account) {
+        return account == null ? new Bank("") : bankService.getBankByAccount(account);
     }
 }
