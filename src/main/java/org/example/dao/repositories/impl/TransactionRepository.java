@@ -1,13 +1,17 @@
 package org.example.dao.repositories.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.core.dto.Period;
 import org.example.dao.repositories.api.ITransactionRepository;
 import org.example.dao.ds.api.IDataSourceWrapper;
 import org.example.dao.entity.TransactionEntity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -18,6 +22,11 @@ public class TransactionRepository implements ITransactionRepository {
     private final Properties properties;
     private final static String SAVE_TRANSACTION = "SQL_SAVE_TRANSACTION";
     private final static String SAVE_ACCOUNT_TRANSACTION = "SQL_SAVE_ACCOUNT_TRANSACTION";
+    private final static String SELECT_TRANSACTIONS_BY_ACCOUNT = "SQL_SELECT_TRANSACTIONS_BY_ACCOUNT";
+
+    /** Метод сохраняет информацию в БД о преведенных транзакциях
+     * @param entity энтити, которую нужно сохранить
+     */
     @Override
     public void saveTransaction(TransactionEntity entity) {
         UUID id_transaction = entity.getId();
@@ -67,11 +76,15 @@ public class TransactionRepository implements ITransactionRepository {
         }
     }
 
+    /**
+     * Метод сохраняет информацию в БД о преведенных ежемесячных начислениях процентов
+     * @param entities Список транзакций (ежемесячные начисленные проценты), которые необходимо сохранить в БД
+     */
     @Override
     public void saveMonthlyInterestTransactions(List<TransactionEntity> entities) {
         try(Connection connection = dataSource.getConnection();
             PreparedStatement preparedStatementTransaction = connection.prepareStatement(properties.getProperty(SAVE_TRANSACTION));
-            PreparedStatement preparedStatementAccountTransaction = connection.prepareStatement(properties.getProperty(SAVE_ACCOUNT_TRANSACTION));) {
+            PreparedStatement preparedStatementAccountTransaction = connection.prepareStatement(properties.getProperty(SAVE_ACCOUNT_TRANSACTION))) {
             try {
                 connection.setAutoCommit(false);//transaction begin
 
@@ -104,6 +117,40 @@ public class TransactionRepository implements ITransactionRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException("Database connection error", e);//TODO custom exception
+        }
+    }
+
+    /** Метод предоставляет список всех транзакций по счету
+     * @param account счет, по которому нужно найти транзакции
+     * @param period период, за который ябудет сформирован список транзакций
+     * @return список всех транзакций по счету. Если транзакций по счету нет, то возвращается пустой список
+     */
+    @Override
+    public List<TransactionEntity> allAccountTransactions(UUID account, Period period) {
+        try(Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(SELECT_TRANSACTIONS_BY_ACCOUNT))) {
+
+            preparedStatement.setObject(1, account);
+            preparedStatement.setObject(2, period.getDateFrom());
+            preparedStatement.setObject(3, period.getDateTo().plusDays(1));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<TransactionEntity> entities = new ArrayList<>();
+            TransactionEntity.TransactionEntityBuilder builder = TransactionEntity.builder();
+
+            while (resultSet.next()) {
+                TransactionEntity entity = builder.setDate(resultSet.getObject("date", LocalDateTime.class))
+                        .setType(resultSet.getString("name_transaction_type"))
+                        .setSum(resultSet.getDouble("sum"))
+                        .build();
+
+                entities.add(entity);
+            }
+
+            return entities;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database connection error", e);// TODO custom exception
         }
     }
 }
