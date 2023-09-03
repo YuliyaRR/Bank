@@ -3,7 +3,7 @@ package org.example.dao.repositories.factory;
 import org.example.dao.repositories.api.IAccountRepository;
 import org.example.dao.ds.factory.DataSourceC3POSingleton;
 import org.example.dao.repositories.impl.AccountRepository;
-import org.example.listener.TransactionPublisher;
+import org.example.listener.impl.transaction.TransactionPublisher;
 
 import java.beans.PropertyVetoException;
 import java.util.Properties;

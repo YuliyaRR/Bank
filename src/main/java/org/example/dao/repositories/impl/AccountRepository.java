@@ -6,13 +6,16 @@ import org.example.core.dto.Transaction;
 import org.example.core.dto.TransactionType;
 import org.example.core.events.TransactionEvent;
 import org.example.dao.entity.AccountEntity;
+import org.example.dao.entity.BankEntity;
+import org.example.dao.entity.ClientEntity;
 import org.example.dao.repositories.api.IAccountRepository;
 import org.example.dao.ds.api.IDataSourceWrapper;
-import org.example.listener.IPublisher;
+import org.example.listener.api.IPublisher;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -27,9 +30,16 @@ public class AccountRepository implements IAccountRepository {
     private final static String CASHLESS_UPDATE_BALANCE = "SQL_CASHLESS_UPDATE_BALANCE";
     private final static String SELECT_ACCOUNTS_BEFORE_INTEREST_PAYMENT = "SQL_SELECT_ACCOUNTS_BEFORE_INTEREST_PAYMENT";
     private final static String MONTHLY_INTEREST_PAYMENT = "SQL_MONTHLY_INTEREST_PAYMENT";
+    private final static String SELECT_ACCOUNT_BY_UUID = "SQL_SELECT_ACCOUNT_BY_UUID";
     private final static String MONTHLY_INTEREST = "MONTHLY_INTEREST";
     private final static String BANK_NAME = "BANK_NAME";
 
+    /**
+     * Метод проверяет есть ли аккаунт с таким идентификатором
+     * @param account UUID проверяемого аккаунта
+     * @return - AccountEntity с полями баланс и тип валюты,
+     * если аккаунт не найден - выбрасывается исключение RuntimeException
+     */
     @Override
     public AccountEntity checkAccount(UUID account) {
 
@@ -56,9 +66,10 @@ public class AccountRepository implements IAccountRepository {
     /**
      * Метод обновляет баланс по счету клиента после пополнения наличными или снятия наличных со счета
      * @param transaction объект, содержащий детали проводимой операции
+     * Если обновление проходит неуспешно, то выбрасывается исключение RuntimeException
      */
     @Override
-    public void updateBalanceCashOperation(Transaction transaction) {
+    public Transaction updateBalanceCashOperation(Transaction transaction) {
         double sum = transaction.getSum();
         UUID account;
 
@@ -91,6 +102,8 @@ public class AccountRepository implements IAccountRepository {
                 transaction.setDate(dateTime);
                 publisher.notify(new TransactionEvent(transaction));
                 connection.commit();//transaction end
+
+                return transaction;
             }
 
         } catch (SQLException e) {
@@ -98,8 +111,14 @@ public class AccountRepository implements IAccountRepository {
         }
     }
 
+    /**
+     * Метод проводит транзакцию между двумя счетами, обновляя балансы в обоих, даже если один из счетов открыт в другом банке
+     * @param transaction объект, содержащий детали проводимой операции
+     * Если обновление проходит неуспешно, то выбрасывается исключение RuntimeException
+     * @return объект transactionб дополненный информацией о дате операции
+     */
     @Override
-    public void updateBalanceCashlessPayments(Transaction transaction) {
+    public Transaction updateBalanceCashlessPayments(Transaction transaction) {
         UUID accountFrom = transaction.getAccountFrom();
         UUID accountTo = transaction.getAccountTo();
         double sum = transaction.getSum();
@@ -132,6 +151,8 @@ public class AccountRepository implements IAccountRepository {
                 transaction.setDate(dateTime);
                 publisher.notify(new TransactionEvent(transaction));
                 connection.commit();//transaction end
+
+                return transaction;
             }
 
         } catch (SQLException e) {
@@ -139,6 +160,10 @@ public class AccountRepository implements IAccountRepository {
         }
     }
 
+    /**
+     * Метод производит расчет и начисление процентов по остаткам на счетах в конце месяца.
+     * Начисление происходит только по счетам, принадлежащим банку Clever-Bank
+     */
     @Override
     public void calculateMonthlyInterest() {
         try (Connection connection = dataSource.getConnection();
@@ -160,7 +185,7 @@ public class AccountRepository implements IAccountRepository {
                 double interest;
 
                 while (resultSet.next()){
-                    UUID num = (UUID) resultSet.getObject("num");
+                    UUID num = resultSet.getObject("num", UUID.class);
                     Currency currency = Currency.valueOf(resultSet.getString("name_currency"));
                     double balance = resultSet.getDouble("balance");
 
@@ -200,6 +225,39 @@ public class AccountRepository implements IAccountRepository {
 
             connection.commit();//transaction end
 
+        } catch (SQLException e) {
+            throw new RuntimeException("Database connection error", e);// TODO custom exception
+        }
+    }
+
+    /**
+     * Метод предоставляет полную информацию по открытому счету
+     * @param uuid счет, по которому запрашивается информация
+     * @return - AccountEntity, содержит всю информацию по счету,
+     * если аккаунт не найден - выбрасывается исключение RuntimeException
+     */
+    @Override
+    public AccountEntity getAccount(UUID uuid) {
+        try(Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(SELECT_ACCOUNT_BY_UUID))) {
+
+            preparedStatement.setObject(1, uuid);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+
+                return AccountEntity.builder()
+                        .setNum(uuid)
+                        .setCurrency(resultSet.getString("name_currency"))
+                        .setBank(new BankEntity(resultSet.getObject("id_bank", UUID.class), resultSet.getString("name_bank")))
+                        .setDateOpen(resultSet.getObject("date_open", LocalDate.class))
+                        .setDateLastTransaction(resultSet.getObject("date_last_transaction", LocalDateTime.class))
+                        .setBalance(resultSet.getDouble("balance"))
+                        .setOwner(new ClientEntity(resultSet.getObject("id_client", UUID.class), resultSet.getString("name_client")))
+                        .build();
+
+            } else {
+                throw new RuntimeException("Account not found");//TODO custom exception
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Database connection error", e);// TODO custom exception
         }

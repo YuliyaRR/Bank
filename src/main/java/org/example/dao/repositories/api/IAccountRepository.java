@@ -7,7 +7,8 @@ import java.util.UUID;
 
 public interface IAccountRepository {
     AccountEntity checkAccount(UUID account);
-    void updateBalanceCashOperation(Transaction transaction);
-    void updateBalanceCashlessPayments(Transaction transaction);
+    Transaction updateBalanceCashOperation(Transaction transaction);
+    Transaction updateBalanceCashlessPayments(Transaction transaction);
     void calculateMonthlyInterest();
+    AccountEntity getAccount(UUID uuid);
 }
