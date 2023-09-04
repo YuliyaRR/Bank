@@ -5,6 +5,7 @@ import org.example.dao.ds.api.IDataSourceWrapper;
 import org.example.dao.ds.factory.DataSourceC3POSingleton;
 import org.example.dao.repositories.factory.AccountRepositorySingleton;
 import org.example.dao.repositories.factory.BankRepositorySingleton;
+import org.example.dao.repositories.factory.ClientRepositorySingleton;
 import org.example.dao.repositories.factory.TransactionRepositorySingleton;
 import org.example.service.api.IAccountService;
 import org.example.service.factory.AccountServiceSingleton;
@@ -56,6 +57,7 @@ public class PropertiesLoaderListener implements ServletContextListener {
             BankRepositorySingleton.setProperties(properties);
             ReportServiceSingleton.setProperties(properties);
             DocCreationServiceSingleton.setProperties(properties);
+            ClientRepositorySingleton.setProperties(properties);
 
             IAccountService accountService = AccountServiceSingleton.getInstance();
 
