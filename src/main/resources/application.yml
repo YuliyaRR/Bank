@@ -24,3 +24,7 @@ SQL_SELECT_ALL_BANKS: SELECT id, name FROM app.banks;
 SQL_INSERT_NEW_BANK: INSERT INTO app.banks(id, name) VALUES (?, ?);
 SQL_UPDATE_BANK: UPDATE app.banks SET name = ? WHERE id = ?;
 SQL_DELETE_BANK: DELETE FROM app.banks WHERE id = ?;
+SQL_SELECT_ALL_CLIENTS: SELECT id, name FROM app.clients;
+SQL_INSERT_NEW_CLIENT: INSERT INTO app.clients(id, name) VALUES (?, ?);
+SQL_UPDATE_CLIENT: UPDATE app.clients SET name = ? WHERE id = ?;
+SQL_DELETE_CLIENT: DELETE FROM app.clients WHERE id = ?;
