@@ -13,6 +13,7 @@ import java.util.UUID;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@NoArgsConstructor
 public class Bank {
     private UUID id;
     private String name;
