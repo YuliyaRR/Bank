@@ -40,102 +40,197 @@ INSERT INTO app.clients (id, name) VALUES ('26605bea-4688-4a8a-b64f-d29e24eb6d81
 
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '1e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_DATE, 10000, '7e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('1e605bea-4688-4a8a-b64f-d29e24eb6d81', '7e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '1e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_DATE, 10000, '8e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('1e605bea-4688-4a8a-b64f-d29e24eb6d81', '8e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '1e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_DATE, 10000, '9e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('1e605bea-4688-4a8a-b64f-d29e24eb6d81', '9e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '1e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_DATE, 10000, '10605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('1e605bea-4688-4a8a-b64f-d29e24eb6d81', '10605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '1e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_DATE, 10000, '11605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('1e605bea-4688-4a8a-b64f-d29e24eb6d81', '11605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '1e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_DATE, 10000, '12605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('1e605bea-4688-4a8a-b64f-d29e24eb6d81', '12605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '1e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_DATE, 10000, '13605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('1e605bea-4688-4a8a-b64f-d29e24eb6d81', '13605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '1e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_DATE, 10000, '14605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('1e605bea-4688-4a8a-b64f-d29e24eb6d81', '14605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '2e605bea-4688-4a8a-b64f-d29e24eb6d82', CURRENT_DATE, 10000, '7e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('2e605bea-4688-4a8a-b64f-d29e24eb6d82', '7e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '2e605bea-4688-4a8a-b64f-d29e24eb6d82', CURRENT_DATE, 10000, '8e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('2e605bea-4688-4a8a-b64f-d29e24eb6d82', '8e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '2e605bea-4688-4a8a-b64f-d29e24eb6d82', CURRENT_DATE, 10000, '9e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('2e605bea-4688-4a8a-b64f-d29e24eb6d82', '9e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '2e605bea-4688-4a8a-b64f-d29e24eb6d82', CURRENT_DATE, 10000, '26605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('2e605bea-4688-4a8a-b64f-d29e24eb6d82', '26605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '2e605bea-4688-4a8a-b64f-d29e24eb6d82', CURRENT_DATE, 10000, '11605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('2e605bea-4688-4a8a-b64f-d29e24eb6d82', '11605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '2e605bea-4688-4a8a-b64f-d29e24eb6d82', CURRENT_DATE, 10000, '12605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('2e605bea-4688-4a8a-b64f-d29e24eb6d82', '12605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '2e605bea-4688-4a8a-b64f-d29e24eb6d82', CURRENT_DATE, 10000, '13605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('2e605bea-4688-4a8a-b64f-d29e24eb6d82', '13605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '2e605bea-4688-4a8a-b64f-d29e24eb6d82', CURRENT_DATE, 10000, '14605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('2e605bea-4688-4a8a-b64f-d29e24eb6d82', '14605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '3e605bea-4688-4a8a-b64f-d29e24eb6d83', CURRENT_DATE, 10000, '7e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('3e605bea-4688-4a8a-b64f-d29e24eb6d83', '7e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '3e605bea-4688-4a8a-b64f-d29e24eb6d83', CURRENT_DATE, 10000, '8e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('3e605bea-4688-4a8a-b64f-d29e24eb6d83', '8e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '3e605bea-4688-4a8a-b64f-d29e24eb6d83', CURRENT_DATE, 10000, '9e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('3e605bea-4688-4a8a-b64f-d29e24eb6d83', '9e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '3e605bea-4688-4a8a-b64f-d29e24eb6d83', CURRENT_DATE, 10000, '25605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('3e605bea-4688-4a8a-b64f-d29e24eb6d83', '25605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '3e605bea-4688-4a8a-b64f-d29e24eb6d83', CURRENT_DATE, 10000, '11605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('3e605bea-4688-4a8a-b64f-d29e24eb6d83', '11605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '3e605bea-4688-4a8a-b64f-d29e24eb6d83', CURRENT_DATE, 10000, '12605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('3e605bea-4688-4a8a-b64f-d29e24eb6d83', '12605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '3e605bea-4688-4a8a-b64f-d29e24eb6d83', CURRENT_DATE, 10000, '13605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('3e605bea-4688-4a8a-b64f-d29e24eb6d83', '13605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '3e605bea-4688-4a8a-b64f-d29e24eb6d83', CURRENT_DATE, 10000, '14605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('3e605bea-4688-4a8a-b64f-d29e24eb6d83', '14605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '4e605bea-4688-4a8a-b64f-d29e24eb6d84', CURRENT_DATE, 10000, '7e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('4e605bea-4688-4a8a-b64f-d29e24eb6d84', '7e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '4e605bea-4688-4a8a-b64f-d29e24eb6d84', CURRENT_DATE, 10000, '8e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('4e605bea-4688-4a8a-b64f-d29e24eb6d84', '8e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '4e605bea-4688-4a8a-b64f-d29e24eb6d84', CURRENT_DATE, 10000, '9e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('4e605bea-4688-4a8a-b64f-d29e24eb6d84', '9e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '4e605bea-4688-4a8a-b64f-d29e24eb6d84', CURRENT_DATE, 10000, '10605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('4e605bea-4688-4a8a-b64f-d29e24eb6d84', '10605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '4e605bea-4688-4a8a-b64f-d29e24eb6d84', CURRENT_DATE, 10000, '11605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('4e605bea-4688-4a8a-b64f-d29e24eb6d84', '11605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '4e605bea-4688-4a8a-b64f-d29e24eb6d84', CURRENT_DATE, 10000, '12605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('4e605bea-4688-4a8a-b64f-d29e24eb6d84', '12605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '4e605bea-4688-4a8a-b64f-d29e24eb6d84', CURRENT_DATE, 10000, '13605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('4e605bea-4688-4a8a-b64f-d29e24eb6d84', '13605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '4e605bea-4688-4a8a-b64f-d29e24eb6d84', CURRENT_DATE, 10000, '14605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('4e605bea-4688-4a8a-b64f-d29e24eb6d84', '14605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '5e605bea-4688-4a8a-b64f-d29e24eb6d85', CURRENT_DATE, 10000, '7e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('5e605bea-4688-4a8a-b64f-d29e24eb6d85', '7e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '5e605bea-4688-4a8a-b64f-d29e24eb6d85', CURRENT_DATE, 10000, '8e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('5e605bea-4688-4a8a-b64f-d29e24eb6d85', '8e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '5e605bea-4688-4a8a-b64f-d29e24eb6d85', CURRENT_DATE, 10000, '9e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('5e605bea-4688-4a8a-b64f-d29e24eb6d85', '9e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '5e605bea-4688-4a8a-b64f-d29e24eb6d85', CURRENT_DATE, 10000, '10605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('5e605bea-4688-4a8a-b64f-d29e24eb6d85', '10605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '5e605bea-4688-4a8a-b64f-d29e24eb6d85', CURRENT_DATE, 10000, '11605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('5e605bea-4688-4a8a-b64f-d29e24eb6d85', '11605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '5e605bea-4688-4a8a-b64f-d29e24eb6d85', CURRENT_DATE, 10000, '18605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('5e605bea-4688-4a8a-b64f-d29e24eb6d85', '18605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '5e605bea-4688-4a8a-b64f-d29e24eb6d85', CURRENT_DATE, 10000, '13605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('5e605bea-4688-4a8a-b64f-d29e24eb6d85', '13605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '5e605bea-4688-4a8a-b64f-d29e24eb6d85', CURRENT_DATE, 10000, '14605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('5e605bea-4688-4a8a-b64f-d29e24eb6d85', '14605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '6e605bea-4688-4a8a-b64f-d29e24eb6d86', CURRENT_DATE, 10000, '7e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('6e605bea-4688-4a8a-b64f-d29e24eb6d86', '7e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'USD', '6e605bea-4688-4a8a-b64f-d29e24eb6d86', CURRENT_DATE, 10000, '16605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('6e605bea-4688-4a8a-b64f-d29e24eb6d86', '16605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '6e605bea-4688-4a8a-b64f-d29e24eb6d86', CURRENT_DATE, 10000, '9e605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('6e605bea-4688-4a8a-b64f-d29e24eb6d86', '9e605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'BYN', '6e605bea-4688-4a8a-b64f-d29e24eb6d86', CURRENT_DATE, 10000, '10605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('6e605bea-4688-4a8a-b64f-d29e24eb6d86', '10605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '6e605bea-4688-4a8a-b64f-d29e24eb6d86', CURRENT_DATE, 10000, '11605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('6e605bea-4688-4a8a-b64f-d29e24eb6d86', '11605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'RUB', '6e605bea-4688-4a8a-b64f-d29e24eb6d86', CURRENT_DATE, 10000, '12605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('6e605bea-4688-4a8a-b64f-d29e24eb6d86', '12605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '6e605bea-4688-4a8a-b64f-d29e24eb6d86', CURRENT_DATE, 10000, '13605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('6e605bea-4688-4a8a-b64f-d29e24eb6d86', '13605bea-4688-4a8a-b64f-d29e24eb6d81');
+
 INSERT INTO app.accounts(num, name_currency, id_bank, date_open, balance, id_client, date_last_transaction)	
 VALUES (gen_random_uuid(), 'EUR', '6e605bea-4688-4a8a-b64f-d29e24eb6d86', CURRENT_DATE, 10000, '14605bea-4688-4a8a-b64f-d29e24eb6d81', CURRENT_TIMESTAMP);
+INSERT INTO app.banks_clients(id_bank, id_clients) VALUES ('6e605bea-4688-4a8a-b64f-d29e24eb6d86', '14605bea-4688-4a8a-b64f-d29e24eb6d81');
