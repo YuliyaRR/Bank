@@ -37,6 +37,8 @@ public class AccountService implements IAccountService {
             throw new RuntimeException("Transaction type doesn't match the operation being performed");//TODO custom exception
         }
 
+        checkTransactionSum(transaction.getSum());
+
         UUID accountTo = transaction.getAccountTo();
         AccountEntity accountEntity = accountRepository.checkAccount(accountTo);
 
@@ -70,13 +72,15 @@ public class AccountService implements IAccountService {
             throw new RuntimeException("Transaction type doesn't match the operation being performed");//TODO custom exception
         }
 
+        double sum = transaction.getSum();
+        checkTransactionSum(sum);
+
         UUID accountFrom = transaction.getAccountFrom();
         AccountEntity accountEntity = accountRepository.checkAccount(accountFrom);
 
         Currency currency = transaction.getCurrency();
         checkAccountCurrency(accountEntity, currency);
 
-        double sum = transaction.getSum();
         checkAccountBalance(accountEntity, sum);
 
         transaction.setSum(-sum);
@@ -108,8 +112,10 @@ public class AccountService implements IAccountService {
             throw new RuntimeException("Transaction type doesn't match the operation being performed");//TODO custom exception
         }
 
-        Currency currency = transaction.getCurrency();
         double sum = transaction.getSum();
+        checkTransactionSum(sum);
+
+        Currency currency = transaction.getCurrency();
         UUID accountFrom = transaction.getAccountFrom();
         UUID accountTo = transaction.getAccountTo();
 
@@ -173,6 +179,16 @@ public class AccountService implements IAccountService {
     public Account getAccountInfo(UUID account) {
         AccountEntity entity = accountRepository.getAccount(account);
         return convertFromEntity(entity);
+    }
+
+    /**
+     * Метод проверяет валидность суммы операции (сумма должна быть положительным числом)
+     * @param sum - сумма транзакции
+     */
+    private void checkTransactionSum(double sum) {
+        if(sum <= 0) {
+            throw new RuntimeException("The amount of any transaction must be greater than zero");
+        }
     }
 
     /** Метод проверяет, совпадает ли валюта платежа и валюта счета
