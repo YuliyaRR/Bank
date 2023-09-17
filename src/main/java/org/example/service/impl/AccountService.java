@@ -18,7 +18,7 @@ public class AccountService implements IAccountService {
     private final IAccountRepository accountRepository;
     private final IBankService bankService;
     private final IPublisher<CheckEvent> publisher;
-    private  boolean isItTimeToCalculateTheMonthlyInterest = false;
+    private boolean isItTimeToCalculateTheMonthlyInterest = false;
 
 
     /**
@@ -140,14 +140,13 @@ public class AccountService implements IAccountService {
      * Пороговое время для начисления 23:59:30.
      */
     @Override
-    public void checkTheNeedToCalculateInterest() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalTime localTime = now.toLocalTime();
+    public void checkTheNeedToCalculateInterest(LocalDateTime localDateTime) {
+        LocalTime localTime = localDateTime.toLocalTime();
+        LocalDate localDate = localDateTime.toLocalDate();
 
-        LocalDate localDate = now.toLocalDate();
         LocalTime expected = LocalTime.of(23, 59, 30);
 
-        int lengthOfMonth = localDate.lengthOfMonth();
+        int lengthOfMonth =localDate.lengthOfMonth();
         int dayOfMonth = localDate.getDayOfMonth();
 
         if(lengthOfMonth == dayOfMonth) {
