@@ -1,11 +1,10 @@
 package org.example.service.impl;
 
-import org.example.core.dto.Check;
-import org.example.core.dto.Currency;
-import org.example.core.dto.Transaction;
-import org.example.core.dto.TransactionType;
+import org.example.core.dto.*;
 import org.example.core.events.CheckEvent;
 import org.example.dao.entity.AccountEntity;
+import org.example.dao.entity.BankEntity;
+import org.example.dao.entity.ClientEntity;
 import org.example.dao.repositories.api.IAccountRepository;
 import org.example.listener.impl.check.CheckPublisher;
 import org.example.service.api.IAccountService;
@@ -18,11 +17,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTest {
@@ -64,10 +65,10 @@ public class AccountServiceTest {
 
         Check check = accountService.addMoney(in);
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(Mockito.any());
-        Mockito.verify(accountRepository, Mockito.times(1)).updateBalanceCashOperation(Mockito.any());
-        Mockito.verify(bankService, Mockito.times(1)).getBankByAccount(Mockito.any());
-        Mockito.verify(publisher, Mockito.times(1)).notify(Mockito.any(CheckEvent.class));
+        verify(accountRepository, times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).updateBalanceCashOperation(Mockito.any());
+        verify(bankService, times(1)).getBankByAccount(Mockito.any());
+        verify(publisher, times(1)).notify(Mockito.any(CheckEvent.class));
 
         assertNotNull(check);
         assertNotNull(check.getNumber());
@@ -104,7 +105,7 @@ public class AccountServiceTest {
         when(accountRepository.checkAccount(any(UUID.class))).thenThrow(RuntimeException.class);
 
         assertThrows(RuntimeException.class, () -> accountService.addMoney(in));
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccount(Mockito.any());
     }
 
     @Test
@@ -120,7 +121,7 @@ public class AccountServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.addMoney(in));
         assertEquals(EXCEPTION_WRONG_CURRENCY, exception.getMessage());
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccount(Mockito.any());
     }
 
     @Test
@@ -135,10 +136,10 @@ public class AccountServiceTest {
 
         Check check = accountService.withdrawalMoney(in);
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(Mockito.any());
-        Mockito.verify(accountRepository, Mockito.times(1)).updateBalanceCashOperation(Mockito.any());
-        Mockito.verify(bankService, Mockito.times(1)).getBankByAccount(Mockito.any());
-        Mockito.verify(publisher, Mockito.times(1)).notify(Mockito.any(CheckEvent.class));
+        verify(accountRepository, times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).updateBalanceCashOperation(Mockito.any());
+        verify(bankService, times(1)).getBankByAccount(Mockito.any());
+        verify(publisher, times(1)).notify(Mockito.any(CheckEvent.class));
 
         assertNotNull(check);
         assertNotNull(check.getNumber());
@@ -176,7 +177,7 @@ public class AccountServiceTest {
         when(accountRepository.checkAccount(any(UUID.class))).thenThrow(RuntimeException.class);
 
         assertThrows(RuntimeException.class, () -> accountService.withdrawalMoney(in));
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccount(Mockito.any());
     }
 
     @Test
@@ -192,7 +193,7 @@ public class AccountServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.withdrawalMoney(in));
         assertEquals(EXCEPTION_WRONG_CURRENCY, exception.getMessage());
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccount(Mockito.any());
     }
 
     @Test
@@ -207,7 +208,7 @@ public class AccountServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.withdrawalMoney(in));
         assertEquals(EXCEPTION_BALANCE, exception.getMessage());
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccount(Mockito.any());
     }
 
     @Test
@@ -223,10 +224,10 @@ public class AccountServiceTest {
 
         Check check = accountService.transferMoney(in);
 
-        Mockito.verify(accountRepository, Mockito.times(2)).checkAccount(Mockito.any(UUID.class));
-        Mockito.verify(accountRepository, Mockito.times(1)).updateBalanceCashlessPayments(in);
-        Mockito.verify(bankService, Mockito.times(2)).getBankByAccount(Mockito.any(UUID.class));
-        Mockito.verify(publisher, Mockito.times(1)).notify(Mockito.any(CheckEvent.class));
+        verify(accountRepository, times(2)).checkAccount(Mockito.any(UUID.class));
+        verify(accountRepository, times(1)).updateBalanceCashlessPayments(in);
+        verify(bankService, times(2)).getBankByAccount(Mockito.any(UUID.class));
+        verify(publisher, times(1)).notify(Mockito.any(CheckEvent.class));
 
         assertNotNull(check);
         assertNotNull(check.getNumber());
@@ -263,7 +264,7 @@ public class AccountServiceTest {
 
         assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
     }
 
     @Test
@@ -277,7 +278,7 @@ public class AccountServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
         assertEquals(EXCEPTION_WRONG_CURRENCY, exception.getMessage());
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
     }
 
     @Test
@@ -291,7 +292,7 @@ public class AccountServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
         assertEquals(EXCEPTION_BALANCE, exception.getMessage());
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
     }
 
     @Test
@@ -304,8 +305,8 @@ public class AccountServiceTest {
 
         assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(in.getAccountFrom());
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(in.getAccountTo());
+        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccount(in.getAccountTo());
     }
 
     @Test
@@ -321,7 +322,80 @@ public class AccountServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
         assertEquals(EXCEPTION_WRONG_CURRENCY, exception.getMessage());
 
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(in.getAccountFrom());
-        Mockito.verify(accountRepository, Mockito.times(1)).checkAccount(in.getAccountTo());
+        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccount(in.getAccountTo());
     }
+
+    @Test
+    public void checkTheNeedToCalculateInterestWhenDateAndTimeAreRightThenCalculateInterest() {
+        LocalDateTime checkMoment = LocalDateTime.of(2023, 8, 31, 23,59, 31);
+        AccountService accountServiceSpy = spy(new AccountService(accountRepository, bankService, publisher));
+
+        accountServiceSpy.checkTheNeedToCalculateInterest(checkMoment);
+        verify(accountServiceSpy, times(1)).calculateInterest();
+    }
+
+    @Test
+    public void checkTheNeedToCalculateInterestWhenDateIsRightButTimeIsWrongThenDoNotCalculateInterest() {
+        LocalDateTime checkMoment = LocalDateTime.of(2023, 8, 31, 23,0, 31);
+        AccountService accountServiceSpy = spy(new AccountService(accountRepository, bankService, publisher));
+
+        accountServiceSpy.checkTheNeedToCalculateInterest(checkMoment);
+        verify(accountServiceSpy, times(0)).calculateInterest();
+    }
+
+    @Test
+    public void checkTheNeedToCalculateInterestWhenDateAndTimeAreWrongThenDoNotCalculateInterest() {
+        LocalDateTime checkMoment = LocalDateTime.of(2023, 8, 3, 23,0, 31);
+        AccountService accountServiceSpy = spy(new AccountService(accountRepository, bankService, publisher));
+
+        accountServiceSpy.checkTheNeedToCalculateInterest(checkMoment);
+        verify(accountServiceSpy, times(0)).calculateInterest();
+    }
+
+    @Test
+    public void checkTheNeedToCalculateInterestWhenTimeIsRightThenCalculateInterestOnlyOnce() {
+        LocalDateTime checkMoment = LocalDateTime.of(2023, 8, 31, 23,59, 31);
+        AccountService accountServiceSpy = spy(new AccountService(accountRepository, bankService, publisher));
+
+        accountServiceSpy.checkTheNeedToCalculateInterest(checkMoment);
+        accountServiceSpy.checkTheNeedToCalculateInterest(checkMoment.plusSeconds(10));
+        verify(accountServiceSpy, times(1)).calculateInterest();
+    }
+
+    @Test
+    public void calculateInterestCheckInvokeRepository() {
+        accountService.calculateInterest();
+        verify(accountRepository, times(1)).calculateMonthlyInterest();
+    }
+
+    @Test
+    public void getAccountInfo() {
+        AccountEntity accountEntity = AccountEntity.builder()
+                .setNum(NUM_ACC_TO)
+                .setCurrency("USD")
+                .setBank(new BankEntity(UUID.randomUUID(), "BankTest"))
+                .setDateOpen(LocalDate.of(2020, 11, 15))
+                .setDateLastTransaction(LocalDateTime.of(2023, 8, 17, 18, 25, 14))
+                .setBalance(1457)
+                .setOwner(new ClientEntity(UUID.randomUUID(), "ClientTest"))
+                .build();
+
+        when(accountRepository.getAccount(any(UUID.class))).thenReturn(accountEntity);
+        Account accountInfo = accountService.getAccountInfo(NUM_ACC_TO);
+
+        verify(accountRepository, times(1)).getAccount(any(UUID.class));
+
+        assertNotNull(accountInfo);
+        assertEquals(NUM_ACC_TO, accountInfo.getNum());
+        assertEquals(accountEntity.getCurrency(), accountInfo.getCurrency().name());
+        assertEquals(accountEntity.getBank().getId(), accountInfo.getBank().getId());
+        assertEquals(accountEntity.getBank().getName(), accountInfo.getBank().getName());
+        assertEquals(accountEntity.getDateOpen(), accountInfo.getDateOpen());
+        assertEquals(accountEntity.getDateLastTransaction(), accountInfo.getDateLastTransaction());
+        assertEquals(accountEntity.getBalance(), accountInfo.getBalance());
+        assertEquals(accountEntity.getOwner().getId(), accountInfo.getOwner().getId());
+        assertEquals(accountEntity.getOwner().getName(), accountInfo.getOwner().getName());
+    }
+
 }
