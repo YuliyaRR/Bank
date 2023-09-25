@@ -1,6 +1,7 @@
 package org.example.service.impl;
 
 import org.example.core.dto.*;
+import org.example.core.dto.docs.Check;
 import org.example.core.events.CheckEvent;
 import org.example.dao.entity.AccountEntity;
 import org.example.dao.entity.BankEntity;

@@ -1,7 +1,7 @@
 package org.example.service.api;
 
 import org.example.core.dto.Account;
-import org.example.core.dto.Check;
+import org.example.core.dto.docs.Check;
 import org.example.core.dto.Transaction;
 
 import java.time.LocalDateTime;
