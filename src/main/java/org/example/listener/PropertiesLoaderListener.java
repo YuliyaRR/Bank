@@ -49,6 +49,14 @@ public class PropertiesLoaderListener implements ServletContextListener {
 
         System.setProperty("PATH_FOR_SAVING_ACCOUNT_STATEMENT", documentsAccountStatement);
 
+        String documentsMoneyStatement = servletContextEvent.getServletContext().getRealPath("/statement-money");
+        File documentsFolderMoneyStatement = new File(documentsMoneyStatement);
+        if (!documentsFolderMoneyStatement.exists()) {
+            documentsFolderMoneyStatement.mkdirs();
+        }
+
+        System.setProperty("PATH_FOR_SAVING_MONEY_STATEMENT", documentsMoneyStatement);
+
         try {
             Properties properties = mapper.readValue(new File(confDir + "/application.yml"), Properties.class);
 
