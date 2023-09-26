@@ -2,6 +2,7 @@ package org.example.dao.repositories.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.core.dto.Period;
+import org.example.core.dto.SumTransactionsInfo;
 import org.example.dao.repositories.api.ITransactionRepository;
 import org.example.dao.ds.api.IDataSourceWrapper;
 import org.example.dao.entity.TransactionEntity;
@@ -23,6 +24,7 @@ public class TransactionRepository implements ITransactionRepository {
     private final static String SAVE_TRANSACTION = "SQL_SAVE_TRANSACTION";
     private final static String SAVE_ACCOUNT_TRANSACTION = "SQL_SAVE_ACCOUNT_TRANSACTION";
     private final static String SELECT_TRANSACTIONS_BY_ACCOUNT = "SQL_SELECT_TRANSACTIONS_BY_ACCOUNT";
+    private final static String SELECT_SUM_INFO_ABOUT_TRANSACTIONS_BY_ACCOUNT = "SQL_SELECT_SUM_INFO_ABOUT_TRANSACTIONS_BY_ACCOUNT";
 
     /** Метод сохраняет информацию в БД о преведенных транзакциях
      * @param entity энтити, которую нужно сохранить
@@ -149,6 +151,33 @@ public class TransactionRepository implements ITransactionRepository {
             }
 
             return entities;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database connection error", e);// TODO custom exception
+        }
+    }
+
+    @Override
+    public SumTransactionsInfo getSumInfoAboutTransactions(UUID account, Period period) {
+        try(Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(SELECT_SUM_INFO_ABOUT_TRANSACTIONS_BY_ACCOUNT))) {
+
+            preparedStatement.setObject(1, account);
+            preparedStatement.setObject(2, period.getDateFrom());
+            preparedStatement.setObject(3, period.getDateTo().plusDays(1));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            SumTransactionsInfo sumTransactionsInfo;
+            if (resultSet.next()) {
+                double income = resultSet.getDouble("income");
+                double outgo = resultSet.getDouble("outgo");
+                sumTransactionsInfo = new SumTransactionsInfo(income, outgo);
+            } else {
+                sumTransactionsInfo = new SumTransactionsInfo(0,0);
+            }
+
+            return sumTransactionsInfo;
+
         } catch (SQLException e) {
             throw new RuntimeException("Database connection error", e);// TODO custom exception
         }
