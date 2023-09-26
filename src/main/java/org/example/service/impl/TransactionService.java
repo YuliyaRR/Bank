@@ -2,6 +2,7 @@ package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.core.dto.Period;
+import org.example.core.dto.SumTransactionsInfo;
 import org.example.core.dto.Transaction;
 import org.example.core.dto.TransactionType;
 import org.example.dao.repositories.api.ITransactionRepository;
@@ -47,6 +48,17 @@ public class TransactionService implements ITransactionService {
         return entities.stream()
                 .map(entity -> convertToDto(entity))
                 .toList();
+    }
+
+
+    /** Метод предоставляет информацию о сумме приходно-расходных операций за заданный период
+     * @param account счет, по которому запрашивается информация
+     * @param period период, за который запрашивается информация
+     * @return SumTransactionsInfo - объект, содержащий итоговую информация о приходно-расходных операциях за период
+     */
+    @Override
+    public SumTransactionsInfo getSumInfoAboutTransactions(UUID account, Period period) {
+        return transactionRepository.getSumInfoAboutTransactions(account, period);
     }
 
     /** Мотод конвертирует dto Transaction в TransactionEntity
