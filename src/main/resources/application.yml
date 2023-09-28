@@ -46,6 +46,8 @@ SQL_SELECT_BANK_BY_ACCOUNT: >
   FROM app.banks 
   INNER JOIN app.accounts ON app.banks.id = app.accounts.id_bank 
   WHERE num = ?;
+SQL_SELECT_BANK_BY_UUID: SELECT name FROM app.banks WHERE id = ?;
+SQL_SELECT_BANK_BY_NAME: SELECT id FROM app.banks WHERE name = ?;
 SQL_SELECT_ALL_BANKS: SELECT id, name FROM app.banks;
 SQL_INSERT_NEW_BANK: INSERT INTO app.banks(id, name) VALUES (?, ?);
 SQL_UPDATE_BANK: UPDATE app.banks SET name = ? WHERE id = ?;
