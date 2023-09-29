@@ -19,6 +19,8 @@ public class BankRepository implements IBankRepository {
     private final IDataSourceWrapper dataSource;
     private final Properties properties;
     private final static String GET_BANK_BY_ACCOUNT = "SQL_SELECT_BANK_BY_ACCOUNT";
+    private final static String SELECT_BANK_BY_UUID = "SQL_SELECT_BANK_BY_UUID";
+    private final static String SELECT_BANK_BY_NAME = "SQL_SELECT_BANK_BY_NAME";
     private final static String SELECT_ALL_BANKS = "SQL_SELECT_ALL_BANKS";
     private final static String INSERT_NEW_BANK = "SQL_INSERT_NEW_BANK";
     private final static String UPDATE_BANK = "SQL_UPDATE_BANK";
@@ -47,6 +49,36 @@ public class BankRepository implements IBankRepository {
             } else {
                 throw new RuntimeException("The bank that owns this account was not found");//TODO custom exception
             }
+        } catch (SQLException e) {
+            throw new RuntimeException("Database connection error", e);// TODO custom exception
+        }
+    }
+
+    @Override
+    public boolean containsBankWithName(String name) {
+        try(Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(SELECT_BANK_BY_NAME))) {
+
+            preparedStatement.setString(1, name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            return resultSet.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Database connection error", e);// TODO custom exception
+        }
+    }
+
+    @Override
+    public boolean containsBankWithUUID(UUID uuid) {
+        try(Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(SELECT_BANK_BY_UUID))) {
+
+            preparedStatement.setObject(1, uuid);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            return resultSet.next();
+
         } catch (SQLException e) {
             throw new RuntimeException("Database connection error", e);// TODO custom exception
         }
