@@ -6,9 +6,9 @@ import org.example.dao.entity.AccountEntity;
 import java.util.UUID;
 
 public interface IAccountRepository {
-    AccountEntity checkAccount(UUID account);
+    AccountEntity checkAccountExistence(UUID account);
     Transaction updateBalanceCashOperation(Transaction transaction);
     Transaction updateBalanceCashlessPayments(Transaction transaction);
     void calculateMonthlyInterest();
-    AccountEntity getAccount(UUID uuid);
+    AccountEntity getAccountInfo(UUID uuid);
 }

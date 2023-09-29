@@ -61,12 +61,12 @@ public class AccountServiceTest {
 
         AccountEntity fromDao = AccountEntity.builder().setBalance(1000).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(any(UUID.class))).thenReturn(fromDao);
+        when(accountRepository.checkAccountExistence(any(UUID.class))).thenReturn(fromDao);
         when(accountRepository.updateBalanceCashOperation(any(Transaction.class))).thenAnswer((Answer<Transaction>) invocation -> (Transaction) invocation.getArgument(0));
 
         Check check = accountService.addMoney(in);
 
-        verify(accountRepository, times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccountExistence(Mockito.any());
         verify(accountRepository, times(1)).updateBalanceCashOperation(Mockito.any());
         verify(bankService, times(1)).getBankByAccount(Mockito.any());
         verify(publisher, times(1)).notify(Mockito.any(CheckEvent.class));
@@ -103,10 +103,10 @@ public class AccountServiceTest {
         in.setAccountFrom(null);
         in.setType(TransactionType.CASH_REPLENISHMENT);
 
-        when(accountRepository.checkAccount(any(UUID.class))).thenThrow(RuntimeException.class);
+        when(accountRepository.checkAccountExistence(any(UUID.class))).thenThrow(RuntimeException.class);
 
         assertThrows(RuntimeException.class, () -> accountService.addMoney(in));
-        verify(accountRepository, times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccountExistence(Mockito.any());
     }
 
     @Test
@@ -117,12 +117,12 @@ public class AccountServiceTest {
 
         AccountEntity fromDao = AccountEntity.builder().setBalance(1000).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(any(UUID.class))).thenReturn(fromDao);
+        when(accountRepository.checkAccountExistence(any(UUID.class))).thenReturn(fromDao);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.addMoney(in));
         assertEquals(EXCEPTION_WRONG_CURRENCY, exception.getMessage());
 
-        verify(accountRepository, times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccountExistence(Mockito.any());
     }
 
     @Test
@@ -132,12 +132,12 @@ public class AccountServiceTest {
 
         AccountEntity fromDao = AccountEntity.builder().setBalance(1000).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(any(UUID.class))).thenReturn(fromDao);
+        when(accountRepository.checkAccountExistence(any(UUID.class))).thenReturn(fromDao);
         when(accountRepository.updateBalanceCashOperation(in)).thenAnswer((Answer<Transaction>) invocation -> (Transaction) invocation.getArgument(0));
 
         Check check = accountService.withdrawalMoney(in);
 
-        verify(accountRepository, times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccountExistence(Mockito.any());
         verify(accountRepository, times(1)).updateBalanceCashOperation(Mockito.any());
         verify(bankService, times(1)).getBankByAccount(Mockito.any());
         verify(publisher, times(1)).notify(Mockito.any(CheckEvent.class));
@@ -175,10 +175,10 @@ public class AccountServiceTest {
         in.setAccountTo(null);
         in.setType(TransactionType.WITHDRAWALS);
 
-        when(accountRepository.checkAccount(any(UUID.class))).thenThrow(RuntimeException.class);
+        when(accountRepository.checkAccountExistence(any(UUID.class))).thenThrow(RuntimeException.class);
 
         assertThrows(RuntimeException.class, () -> accountService.withdrawalMoney(in));
-        verify(accountRepository, times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccountExistence(Mockito.any());
     }
 
     @Test
@@ -189,12 +189,12 @@ public class AccountServiceTest {
 
         AccountEntity fromDao = AccountEntity.builder().setBalance(1000).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(any(UUID.class))).thenReturn(fromDao);
+        when(accountRepository.checkAccountExistence(any(UUID.class))).thenReturn(fromDao);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.withdrawalMoney(in));
         assertEquals(EXCEPTION_WRONG_CURRENCY, exception.getMessage());
 
-        verify(accountRepository, times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccountExistence(Mockito.any());
     }
 
     @Test
@@ -204,12 +204,12 @@ public class AccountServiceTest {
 
         AccountEntity fromDao = AccountEntity.builder().setBalance(50).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(any(UUID.class))).thenReturn(fromDao);
+        when(accountRepository.checkAccountExistence(any(UUID.class))).thenReturn(fromDao);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.withdrawalMoney(in));
         assertEquals(EXCEPTION_BALANCE, exception.getMessage());
 
-        verify(accountRepository, times(1)).checkAccount(Mockito.any());
+        verify(accountRepository, times(1)).checkAccountExistence(Mockito.any());
     }
 
     @Test
@@ -219,13 +219,13 @@ public class AccountServiceTest {
         AccountEntity accountTo = AccountEntity.builder().setBalance(1000).setCurrency("USD").build();
         AccountEntity accountFrom = AccountEntity.builder().setBalance(20000).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(in.getAccountFrom())).thenReturn(accountFrom);
-        when(accountRepository.checkAccount(in.getAccountTo())).thenReturn(accountTo);
+        when(accountRepository.checkAccountExistence(in.getAccountFrom())).thenReturn(accountFrom);
+        when(accountRepository.checkAccountExistence(in.getAccountTo())).thenReturn(accountTo);
         when(accountRepository.updateBalanceCashlessPayments(in)).thenAnswer((Answer<Transaction>) invocation -> (Transaction) invocation.getArgument(0));
 
         Check check = accountService.transferMoney(in);
 
-        verify(accountRepository, times(2)).checkAccount(Mockito.any(UUID.class));
+        verify(accountRepository, times(2)).checkAccountExistence(Mockito.any(UUID.class));
         verify(accountRepository, times(1)).updateBalanceCashlessPayments(in);
         verify(bankService, times(2)).getBankByAccount(Mockito.any(UUID.class));
         verify(publisher, times(1)).notify(Mockito.any(CheckEvent.class));
@@ -261,11 +261,11 @@ public class AccountServiceTest {
     public void transferMoneyWhenAccountFromWasNotFoundThenThrowException(){
         in.setType(TransactionType.WAGE);
 
-        when(accountRepository.checkAccount(in.getAccountFrom())).thenThrow(RuntimeException.class);
+        when(accountRepository.checkAccountExistence(in.getAccountFrom())).thenThrow(RuntimeException.class);
 
         assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
 
-        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccountExistence(in.getAccountFrom());
     }
 
     @Test
@@ -274,12 +274,12 @@ public class AccountServiceTest {
         in.setCurrency(Currency.RUB);
         AccountEntity accountFrom = AccountEntity.builder().setBalance(20000).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(in.getAccountFrom())).thenReturn(accountFrom);
+        when(accountRepository.checkAccountExistence(in.getAccountFrom())).thenReturn(accountFrom);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
         assertEquals(EXCEPTION_WRONG_CURRENCY, exception.getMessage());
 
-        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccountExistence(in.getAccountFrom());
     }
 
     @Test
@@ -288,12 +288,12 @@ public class AccountServiceTest {
 
         AccountEntity fromDao = AccountEntity.builder().setBalance(50).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(any(UUID.class))).thenReturn(fromDao);
+        when(accountRepository.checkAccountExistence(any(UUID.class))).thenReturn(fromDao);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
         assertEquals(EXCEPTION_BALANCE, exception.getMessage());
 
-        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccountExistence(in.getAccountFrom());
     }
 
     @Test
@@ -301,13 +301,13 @@ public class AccountServiceTest {
         in.setType(TransactionType.WAGE);
         AccountEntity accountFrom = AccountEntity.builder().setBalance(20000).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(in.getAccountFrom())).thenReturn(accountFrom);
-        when(accountRepository.checkAccount(in.getAccountTo())).thenThrow(RuntimeException.class);
+        when(accountRepository.checkAccountExistence(in.getAccountFrom())).thenReturn(accountFrom);
+        when(accountRepository.checkAccountExistence(in.getAccountTo())).thenThrow(RuntimeException.class);
 
         assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
 
-        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
-        verify(accountRepository, times(1)).checkAccount(in.getAccountTo());
+        verify(accountRepository, times(1)).checkAccountExistence(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccountExistence(in.getAccountTo());
     }
 
     @Test
@@ -317,14 +317,14 @@ public class AccountServiceTest {
         AccountEntity accountFrom = AccountEntity.builder().setBalance(20000).setCurrency("RUB").build();
         AccountEntity accountTo= AccountEntity.builder().setBalance(1000).setCurrency("USD").build();
 
-        when(accountRepository.checkAccount(in.getAccountFrom())).thenReturn(accountFrom);
-        when(accountRepository.checkAccount(in.getAccountTo())).thenReturn(accountTo);
+        when(accountRepository.checkAccountExistence(in.getAccountFrom())).thenReturn(accountFrom);
+        when(accountRepository.checkAccountExistence(in.getAccountTo())).thenReturn(accountTo);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> accountService.transferMoney(in));
         assertEquals(EXCEPTION_WRONG_CURRENCY, exception.getMessage());
 
-        verify(accountRepository, times(1)).checkAccount(in.getAccountFrom());
-        verify(accountRepository, times(1)).checkAccount(in.getAccountTo());
+        verify(accountRepository, times(1)).checkAccountExistence(in.getAccountFrom());
+        verify(accountRepository, times(1)).checkAccountExistence(in.getAccountTo());
     }
 
     @Test
@@ -382,10 +382,10 @@ public class AccountServiceTest {
                 .setOwner(new ClientEntity(UUID.randomUUID(), "ClientTest"))
                 .build();
 
-        when(accountRepository.getAccount(any(UUID.class))).thenReturn(accountEntity);
+        when(accountRepository.getAccountInfo(any(UUID.class))).thenReturn(accountEntity);
         Account accountInfo = accountService.getAccountInfo(NUM_ACC_TO);
 
-        verify(accountRepository, times(1)).getAccount(any(UUID.class));
+        verify(accountRepository, times(1)).getAccountInfo(any(UUID.class));
 
         assertNotNull(accountInfo);
         assertEquals(NUM_ACC_TO, accountInfo.getNum());

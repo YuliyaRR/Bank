@@ -41,7 +41,7 @@ public class AccountService implements IAccountService {
         checkTransactionSum(transaction.getSum());
 
         UUID accountTo = transaction.getAccountTo();
-        AccountEntity accountEntity = accountRepository.checkAccount(accountTo);
+        AccountEntity accountEntity = accountRepository.checkAccountExistence(accountTo);
 
         Currency currency = transaction.getCurrency();
         checkAccountCurrency(accountEntity, currency);
@@ -77,7 +77,7 @@ public class AccountService implements IAccountService {
         checkTransactionSum(sum);
 
         UUID accountFrom = transaction.getAccountFrom();
-        AccountEntity accountEntity = accountRepository.checkAccount(accountFrom);
+        AccountEntity accountEntity = accountRepository.checkAccountExistence(accountFrom);
 
         Currency currency = transaction.getCurrency();
         checkAccountCurrency(accountEntity, currency);
@@ -120,11 +120,11 @@ public class AccountService implements IAccountService {
         UUID accountFrom = transaction.getAccountFrom();
         UUID accountTo = transaction.getAccountTo();
 
-        AccountEntity accountEntityFrom = accountRepository.checkAccount(accountFrom);
+        AccountEntity accountEntityFrom = accountRepository.checkAccountExistence(accountFrom);
         checkAccountCurrency(accountEntityFrom, currency);
         checkAccountBalance(accountEntityFrom, sum);
 
-        AccountEntity accountEntityTo = accountRepository.checkAccount(accountTo);
+        AccountEntity accountEntityTo = accountRepository.checkAccountExistence(accountTo);
         checkAccountCurrency(accountEntityTo, currency);
 
         transaction.setId(UUID.randomUUID());
@@ -177,7 +177,7 @@ public class AccountService implements IAccountService {
      */
     @Override
     public Account getAccountInfo(UUID account) {
-        AccountEntity entity = accountRepository.getAccount(account);
+        AccountEntity entity = accountRepository.getAccountInfo(account);
         return convertFromEntity(entity);
     }
 
