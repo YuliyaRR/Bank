@@ -40,7 +40,9 @@ public class BankService implements IBankService {
      */
     @Override
     public void createBank(Bank bank) {
-        bankRepository.saveBank(new BankEntity(UUID.randomUUID(), bank.getName()));
+        String name = bank.getName();
+        checkNameUnique(name);
+        bankRepository.saveBank(new BankEntity(UUID.randomUUID(), name));
     }
 
     /**
@@ -50,7 +52,10 @@ public class BankService implements IBankService {
      */
     @Override
     public void updateBank(UUID uuid, Bank bank) {
-        bankRepository.updateBank(uuid, new BankEntity(uuid, bank.getName()));
+        String name = bank.getName();
+        checkBankExistenceWithUuid(uuid);
+        checkNameUnique(name);
+        bankRepository.updateBank(uuid, new BankEntity(uuid, name));
     }
 
     /**
@@ -59,14 +64,33 @@ public class BankService implements IBankService {
      */
     @Override
     public void deleteBank(UUID uuid) {
+        checkBankExistenceWithUuid(uuid);
         bankRepository.deleteBank(uuid);
     }
 
-    /** Мотод конвертирует BankEntity в Bank
+    /** Метод конвертирует BankEntity в Bank
      * @param entity объект-источник
      * @return Bank
      */
     private Bank convertEntityToDto(BankEntity entity) {
         return new Bank(entity.getId(), entity.getName());
+    }
+
+    /** Метод проверяет уникальность переданного имени
+     * @param name имя, которое будет присвоено банку
+     */
+    private void checkNameUnique(String name) {
+       if (bankRepository.containsBankWithName(name)) {
+           throw new RuntimeException("Bank with the same name already exists");
+       }
+    }
+
+    /** Метод проверяет существует ли банк с переданным идентификатором
+     * @param uuid идентификатор банка
+     */
+    private void checkBankExistenceWithUuid(UUID uuid) {
+        if (!bankRepository.containsBankWithUUID(uuid)) {
+            throw new RuntimeException("Bank not found");
+        }
     }
 }
