@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +49,14 @@ public class PropertiesLoaderListener implements ServletContextListener {
 
         System.setProperty("PATH_FOR_SAVING_ACCOUNT_STATEMENT", documentsAccountStatement);
 
+        String documentsMoneyStatement = servletContextEvent.getServletContext().getRealPath("/statement-money");
+        File documentsFolderMoneyStatement = new File(documentsMoneyStatement);
+        if (!documentsFolderMoneyStatement.exists()) {
+            documentsFolderMoneyStatement.mkdirs();
+        }
+
+        System.setProperty("PATH_FOR_SAVING_MONEY_STATEMENT", documentsMoneyStatement);
+
         try {
             Properties properties = mapper.readValue(new File(confDir + "/application.yml"), Properties.class);
 
@@ -63,7 +72,7 @@ public class PropertiesLoaderListener implements ServletContextListener {
 
             ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-            scheduledExecutor.scheduleAtFixedRate(() -> accountService.checkTheNeedToCalculateInterest(),
+            scheduledExecutor.scheduleAtFixedRate(() -> accountService.checkTheNeedToCalculateInterest(LocalDateTime.now()),
                     1000, 30000, TimeUnit.MILLISECONDS);
 
         } catch (IOException e) {

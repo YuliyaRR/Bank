@@ -2,7 +2,10 @@ package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.core.dto.*;
+import org.example.core.dto.docs.AccountStatement;
+import org.example.core.dto.docs.MoneyStatement;
 import org.example.core.events.AccountStatementEvent;
+import org.example.core.events.MoneyStatementEvent;
 import org.example.listener.api.IPublisher;
 import org.example.service.api.IAccountService;
 import org.example.service.api.IReportService;
@@ -19,7 +22,8 @@ import java.util.UUID;
 public class ReportService implements IReportService {
     private final IAccountService accountService;
     private final ITransactionService transactionService;
-    private final IPublisher<AccountStatementEvent> publisher;
+    private final IPublisher<AccountStatementEvent> publisherAS;
+    private final IPublisher<MoneyStatementEvent> publisherMS;
     private final Properties properties;
     private final static String BANK_NAME = "BANK_NAME";
 
@@ -51,10 +55,36 @@ public class ReportService implements IReportService {
                 .setTransactions(transactionList)
                 .build();
 
-        publisher.notify(new AccountStatementEvent(accountStatement));
+        publisherAS.notify(new AccountStatementEvent(accountStatement));
 
         return accountStatement;
 
+    }
+
+    @Override
+    public MoneyStatement getMoneyStatement(UUID account, Period period) {
+        checkDate(period);
+
+        Account accountInfo = accountService.getAccountInfo(account);
+
+        if(period.getDateFrom().isBefore(accountInfo.getDateOpen())){
+            throw new RuntimeException("The start date of searching for cash flow information cannot be earlier than the account opening date");
+        }
+
+        checkBank(accountInfo.getBank());
+
+        SumTransactionsInfo sumInfoAboutTransactions = transactionService.getSumInfoAboutTransactions(account, period);
+
+        MoneyStatement moneyStatement = MoneyStatement.builder()
+                .setAccount(accountInfo)
+                .setPeriod(period)
+                .setCreationTime(LocalDateTime.now())
+                .setSumTransactionsInfo(sumInfoAboutTransactions)
+                .build();
+
+        publisherMS.notify(new MoneyStatementEvent(moneyStatement));
+
+        return moneyStatement;
     }
 
     /** Метод проверяет, является ли банк клиента - Clever-Bank'ом
@@ -63,7 +93,7 @@ public class ReportService implements IReportService {
      */
     private void checkBank(Bank bank) {
         if (!bank.getName().equals(properties.getProperty(BANK_NAME))) {
-            throw new RuntimeException("Your account doesn't belong to CleverBank. We can't create account statement for you.");//TODO custom exception
+            throw new RuntimeException("Your account doesn't belong to CleverBank. We can't create reports for you.");//TODO custom exception
         }
     }
 
@@ -89,6 +119,20 @@ public class ReportService implements IReportService {
         }
 
         return from;
+    }
+
+    private void checkDate(Period period) {
+        LocalDate now = LocalDate.now();
+        LocalDate from = period.getDateFrom();
+        LocalDate to = period.getDateTo();
+
+        if (from.isAfter(now) || to.isAfter(now)) {
+            throw new RuntimeException("The date can't be later than the current date");
+        }
+
+        if(from.isAfter(to)) {
+            throw new RuntimeException("Invalid time period");
+        }
     }
 
 }

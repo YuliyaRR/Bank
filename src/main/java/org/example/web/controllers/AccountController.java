@@ -1,7 +1,7 @@
 package org.example.web.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.core.dto.Check;
+import org.example.core.dto.docs.Check;
 import org.example.core.dto.Transaction;
 import org.example.service.api.IAccountService;
 import org.example.service.factory.AccountServiceSingleton;
@@ -38,8 +38,8 @@ public class AccountController extends HttpServlet {
 
             double sum = transaction.getSum();
 
-            if(sum < 0) {
-                throw new RuntimeException("The amount of any transaction must be a positive number");
+            if(sum <= 0) {
+                throw new RuntimeException("The amount of any transaction must be greater than zero");
             }
 
             Check check;

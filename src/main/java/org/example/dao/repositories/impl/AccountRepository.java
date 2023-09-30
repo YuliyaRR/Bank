@@ -41,7 +41,7 @@ public class AccountRepository implements IAccountRepository {
      * если аккаунт не найден - выбрасывается исключение RuntimeException
      */
     @Override
-    public AccountEntity checkAccount(UUID account) {
+    public AccountEntity checkAccountExistence(UUID account) {
 
         try(Connection connection = dataSource.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(CHECK_ACCOUNT))) {
@@ -237,7 +237,7 @@ public class AccountRepository implements IAccountRepository {
      * если аккаунт не найден - выбрасывается исключение RuntimeException
      */
     @Override
-    public AccountEntity getAccount(UUID uuid) {
+    public AccountEntity getAccountInfo(UUID uuid) {
         try(Connection connection = dataSource.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(SELECT_ACCOUNT_BY_UUID))) {
 

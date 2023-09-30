@@ -2,6 +2,7 @@ package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.core.dto.*;
+import org.example.core.dto.docs.Check;
 import org.example.core.events.CheckEvent;
 import org.example.dao.entity.AccountEntity;
 import org.example.dao.repositories.api.IAccountRepository;
@@ -18,7 +19,7 @@ public class AccountService implements IAccountService {
     private final IAccountRepository accountRepository;
     private final IBankService bankService;
     private final IPublisher<CheckEvent> publisher;
-    private  boolean isItTimeToCalculateTheMonthlyInterest = false;
+    private boolean isItTimeToCalculateTheMonthlyInterest = false;
 
 
     /**
@@ -37,8 +38,10 @@ public class AccountService implements IAccountService {
             throw new RuntimeException("Transaction type doesn't match the operation being performed");//TODO custom exception
         }
 
+        checkTransactionSum(transaction.getSum());
+
         UUID accountTo = transaction.getAccountTo();
-        AccountEntity accountEntity = accountRepository.checkAccount(accountTo);
+        AccountEntity accountEntity = accountRepository.checkAccountExistence(accountTo);
 
         Currency currency = transaction.getCurrency();
         checkAccountCurrency(accountEntity, currency);
@@ -70,13 +73,15 @@ public class AccountService implements IAccountService {
             throw new RuntimeException("Transaction type doesn't match the operation being performed");//TODO custom exception
         }
 
+        double sum = transaction.getSum();
+        checkTransactionSum(sum);
+
         UUID accountFrom = transaction.getAccountFrom();
-        AccountEntity accountEntity = accountRepository.checkAccount(accountFrom);
+        AccountEntity accountEntity = accountRepository.checkAccountExistence(accountFrom);
 
         Currency currency = transaction.getCurrency();
         checkAccountCurrency(accountEntity, currency);
 
-        double sum = transaction.getSum();
         checkAccountBalance(accountEntity, sum);
 
         transaction.setSum(-sum);
@@ -108,16 +113,18 @@ public class AccountService implements IAccountService {
             throw new RuntimeException("Transaction type doesn't match the operation being performed");//TODO custom exception
         }
 
-        Currency currency = transaction.getCurrency();
         double sum = transaction.getSum();
+        checkTransactionSum(sum);
+
+        Currency currency = transaction.getCurrency();
         UUID accountFrom = transaction.getAccountFrom();
         UUID accountTo = transaction.getAccountTo();
 
-        AccountEntity accountEntityFrom = accountRepository.checkAccount(accountFrom);
+        AccountEntity accountEntityFrom = accountRepository.checkAccountExistence(accountFrom);
         checkAccountCurrency(accountEntityFrom, currency);
         checkAccountBalance(accountEntityFrom, sum);
 
-        AccountEntity accountEntityTo = accountRepository.checkAccount(accountTo);
+        AccountEntity accountEntityTo = accountRepository.checkAccountExistence(accountTo);
         checkAccountCurrency(accountEntityTo, currency);
 
         transaction.setId(UUID.randomUUID());
@@ -134,14 +141,13 @@ public class AccountService implements IAccountService {
      * Пороговое время для начисления 23:59:30.
      */
     @Override
-    public void checkTheNeedToCalculateInterest() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalTime localTime = now.toLocalTime();
+    public void checkTheNeedToCalculateInterest(LocalDateTime localDateTime) {
+        LocalTime localTime = localDateTime.toLocalTime();
+        LocalDate localDate = localDateTime.toLocalDate();
 
-        LocalDate localDate = now.toLocalDate();
         LocalTime expected = LocalTime.of(23, 59, 30);
 
-        int lengthOfMonth = localDate.lengthOfMonth();
+        int lengthOfMonth =localDate.lengthOfMonth();
         int dayOfMonth = localDate.getDayOfMonth();
 
         if(lengthOfMonth == dayOfMonth) {
@@ -171,8 +177,18 @@ public class AccountService implements IAccountService {
      */
     @Override
     public Account getAccountInfo(UUID account) {
-        AccountEntity entity = accountRepository.getAccount(account);
+        AccountEntity entity = accountRepository.getAccountInfo(account);
         return convertFromEntity(entity);
+    }
+
+    /**
+     * Метод проверяет валидность суммы операции (сумма должна быть положительным числом)
+     * @param sum - сумма транзакции
+     */
+    private void checkTransactionSum(double sum) {
+        if(sum <= 0) {
+            throw new RuntimeException("The amount of any transaction must be greater than zero");
+        }
     }
 
     /** Метод проверяет, совпадает ли валюта платежа и валюта счета

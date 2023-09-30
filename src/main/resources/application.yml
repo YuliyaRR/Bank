@@ -1,30 +1,86 @@
 # db settings
 driverDataSource: org.postgresql.Driver
 urlDB: jdbc:postgresql://localhost:5432/bank
-usernameDB: postgres
-passwordDB: qaz741
+usernameDB:
+passwordDB:
 
 # constants
 MONTHLY_INTEREST: 0.01
 BANK_NAME: Clever-Bank
 
 # sql
+## operations with accounts
 SQL_CHECK_ACCOUNT: SELECT balance, name_currency FROM app.accounts WHERE num = ?;
-SQL_CASH_UPDATE_BALANCE_WITH_CHECK: UPDATE app.accounts SET balance = balance + ?, date_last_transaction = ? WHERE num = ? AND balance >= ABS(?);
-SQL_CASH_UPDATE_BALANCE: UPDATE app.accounts SET balance = balance + ?, date_last_transaction = ? WHERE num = ?;
-SQL_CASHLESS_UPDATE_BALANCE: UPDATE app.accounts SET balance=CASE num WHEN ? THEN balance - ? WHEN ? THEN balance + ? END, date_last_transaction = ? WHERE ? <= (SELECT balance from app.accounts where num = ?) AND num IN (?, ?);
-SQL_SELECT_ACCOUNTS_BEFORE_INTEREST_PAYMENT: SELECT num, name_currency, balance FROM app.accounts WHERE id_bank = (SELECT id FROM app.banks WHERE name = ?);
-SQL_MONTHLY_INTEREST_PAYMENT: UPDATE app.accounts SET balance= ?, date_last_transaction = ? WHERE num = ?;
-SQL_SAVE_TRANSACTION: INSERT INTO app.transactions(id, name_transaction_type, name_currency, date) VALUES (?, ?, ?, ?);
-SQL_SAVE_ACCOUNT_TRANSACTION: INSERT INTO app.account_transaction(num_account, id_transaction, sum) VALUES (?, ?, ?);
-SQL_SELECT_BANK_BY_ACCOUNT: SELECT id, name FROM app.banks INNER JOIN app.accounts ON app.banks.id = app.accounts.id_bank WHERE num = ?;
-SQL_SELECT_ACCOUNT_BY_UUID: SELECT name_currency, id_bank, app.banks.name AS name_bank, date_open, balance, id_client, app.clients.name AS name_client, date_last_transaction FROM app.accounts INNER JOIN app.banks ON app.accounts.id_bank = app.banks.id INNER JOIN app.clients ON app.accounts.id_client = app.clients.id WHERE num = ?;
-SQL_SELECT_TRANSACTIONS_BY_ACCOUNT: SELECT date, name_transaction_type, sum FROM app.account_transaction INNER JOIN app.transactions ON app.account_transaction.id_transaction =app.transactions.id WHERE num_account = ? AND date BETWEEN ? AND ? ORDER BY date ASC;
+SQL_CASH_UPDATE_BALANCE_WITH_CHECK: >
+  UPDATE app.accounts 
+  SET balance = balance + ?, date_last_transaction = ? 
+  WHERE num = ? AND balance >= ABS(?);
+SQL_CASH_UPDATE_BALANCE: >
+  UPDATE app.accounts 
+  SET balance = balance + ?, date_last_transaction = ? 
+  WHERE num = ?;
+SQL_CASHLESS_UPDATE_BALANCE: >
+  UPDATE app.accounts 
+  SET balance=CASE num WHEN ? THEN balance - ? WHEN ? THEN balance + ? END, date_last_transaction = ? 
+  WHERE ? <= (SELECT balance from app.accounts where num = ?) AND num IN (?, ?);
+SQL_SELECT_ACCOUNTS_BEFORE_INTEREST_PAYMENT: >
+  SELECT num, name_currency, balance 
+  FROM app.accounts 
+  WHERE id_bank = (SELECT id FROM app.banks WHERE name = ?);
+SQL_MONTHLY_INTEREST_PAYMENT: >
+  UPDATE app.accounts 
+  SET balance= ?, date_last_transaction = ? 
+  WHERE num = ?;
+
+## operations with transactions
+SQL_SAVE_TRANSACTION: >
+  INSERT INTO app.transactions(id, name_transaction_type, name_currency, date) 
+  VALUES (?, ?, ?, ?);
+SQL_SAVE_ACCOUNT_TRANSACTION: >
+  INSERT INTO app.account_transaction(num_account, id_transaction, sum) 
+  VALUES (?, ?, ?);
+
+## operations with banks
+SQL_SELECT_BANK_BY_ACCOUNT: >
+  SELECT id, name 
+  FROM app.banks 
+  INNER JOIN app.accounts ON app.banks.id = app.accounts.id_bank 
+  WHERE num = ?;
+SQL_SELECT_BANK_BY_UUID: SELECT name FROM app.banks WHERE id = ?;
+SQL_SELECT_BANK_BY_NAME: SELECT id FROM app.banks WHERE name = ?;
 SQL_SELECT_ALL_BANKS: SELECT id, name FROM app.banks;
 SQL_INSERT_NEW_BANK: INSERT INTO app.banks(id, name) VALUES (?, ?);
 SQL_UPDATE_BANK: UPDATE app.banks SET name = ? WHERE id = ?;
 SQL_DELETE_BANK: DELETE FROM app.banks WHERE id = ?;
+
+## operations with clients
 SQL_SELECT_ALL_CLIENTS: SELECT id, name FROM app.clients;
 SQL_INSERT_NEW_CLIENT: INSERT INTO app.clients(id, name) VALUES (?, ?);
 SQL_UPDATE_CLIENT: UPDATE app.clients SET name = ? WHERE id = ?;
 SQL_DELETE_CLIENT: DELETE FROM app.clients WHERE id = ?;
+SQL_SELECT_CLIENT_BY_ID: SELECT name FROM app.clients WHERE id = ?;
+
+## reporting operations
+SQL_SELECT_ACCOUNT_BY_UUID: >
+  SELECT name_currency, id_bank, app.banks.name AS name_bank, date_open, 
+  balance, id_client, app.clients.name AS name_client, date_last_transaction 
+  FROM app.accounts 
+  INNER JOIN app.banks ON app.accounts.id_bank = app.banks.id 
+  INNER JOIN app.clients ON app.accounts.id_client = app.clients.id 
+  WHERE num = ?;
+SQL_SELECT_TRANSACTIONS_BY_ACCOUNT: >
+  SELECT date, name_transaction_type, sum 
+  FROM app.account_transaction 
+  INNER JOIN app.transactions ON app.account_transaction.id_transaction =app.transactions.id 
+  WHERE num_account = ? AND date BETWEEN ? AND ? 
+  ORDER BY date ASC;
+SQL_SELECT_SUM_INFO_ABOUT_TRANSACTIONS_BY_ACCOUNT: > 
+  SELECT SUM(app.account_transaction.sum) FILTER (WHERE app.account_transaction.sum > 0) AS income,
+  SUM(app.account_transaction.sum) FILTER (WHERE app.account_transaction.sum < 0) AS outgo
+  FROM app.accounts
+  INNER JOIN app.account_transaction ON app.accounts.num = app.account_transaction.num_account
+  INNER JOIN app.transactions ON app.account_transaction.id_transaction = app.transactions.id
+  WHERE app.accounts.num = ? AND app.transactions.date BETWEEN ? AND ?
+  GROUP BY balance;
+
+

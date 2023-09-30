@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public interface IBankRepository {
     BankEntity getBankByAccount(UUID account);
+    boolean containsBankWithName(String name);
+    boolean containsBankWithUUID(UUID uuid);
     List<BankEntity> getAllBanks();
     void saveBank (BankEntity bank);
     void updateBank(UUID uuid, BankEntity bankEntity);

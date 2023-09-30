@@ -1,6 +1,7 @@
 package org.example.service.factory;
 
 import org.example.listener.impl.accountStatement.AccountStatementPublisher;
+import org.example.listener.impl.moneyStatement.MoneyStatementPublisher;
 import org.example.service.api.IReportService;
 import org.example.service.impl.ReportService;
 
@@ -33,6 +34,7 @@ public class ReportServiceSingleton {
                             AccountServiceSingleton.getInstance(),
                             TransactionServiceSingleton.getInstance(),
                             new AccountStatementPublisher(),
+                            new MoneyStatementPublisher(),
                             properties
                             );
                 }
