@@ -30,6 +30,10 @@ public class BankService implements IBankService {
     @Override
     public List<Bank> getAllBanks() {
         List<BankEntity> allBanks = bankRepository.getAllBanks();
+
+        if(allBanks.isEmpty()) {
+            throw new RuntimeException("There are no banks registered in the system");
+        }
         return allBanks.stream()
                 .map(bankEntity -> convertEntityToDto(bankEntity))
                 .toList();
@@ -53,7 +57,7 @@ public class BankService implements IBankService {
     @Override
     public void updateBank(UUID uuid, Bank bank) {
         String name = bank.getName();
-        checkBankExistenceWithUuid(uuid);
+        checkBankExistenceByUuid(uuid);
         checkNameUnique(name);
         bankRepository.updateBank(uuid, new BankEntity(uuid, name));
     }
@@ -64,7 +68,7 @@ public class BankService implements IBankService {
      */
     @Override
     public void deleteBank(UUID uuid) {
-        checkBankExistenceWithUuid(uuid);
+        checkBankExistenceByUuid(uuid);
         bankRepository.deleteBank(uuid);
     }
 
@@ -88,7 +92,7 @@ public class BankService implements IBankService {
     /** Метод проверяет существует ли банк с переданным идентификатором
      * @param uuid идентификатор банка
      */
-    private void checkBankExistenceWithUuid(UUID uuid) {
+    private void checkBankExistenceByUuid(UUID uuid) {
         if (!bankRepository.containsBankWithUUID(uuid)) {
             throw new RuntimeException("Bank not found");
         }
