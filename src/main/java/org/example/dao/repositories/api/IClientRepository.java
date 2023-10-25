@@ -10,4 +10,5 @@ public interface IClientRepository {
     void saveClient (ClientEntity client);
     void updateClient(UUID id, ClientEntity clientEntity);
     void deleteClient(UUID id);
+    boolean containsClientWithUUID(UUID id);
 }

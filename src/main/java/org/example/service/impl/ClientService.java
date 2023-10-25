@@ -20,6 +20,11 @@ public class ClientService implements IClientService {
     @Override
     public List<Client> getAllClients() {
         List<ClientEntity> allClients = clientRepository.getAllClients();
+
+        if(allClients.isEmpty()) {
+            throw new RuntimeException("There are no clients registered in the system");
+        }
+
         return allClients.stream()
                 .map(clientEntity -> convertEntityToDto(clientEntity))
                 .toList();
@@ -40,6 +45,7 @@ public class ClientService implements IClientService {
      */
     @Override
     public void updateClient(UUID uuid, Client client) {
+        checkClientExistenceByUUID(uuid);
         clientRepository.updateClient(uuid, new ClientEntity(uuid, client.getName()));
     }
 
@@ -49,10 +55,20 @@ public class ClientService implements IClientService {
      */
     @Override
     public void deleteClient(UUID uuid) {
+        checkClientExistenceByUUID(uuid);
         clientRepository.deleteClient(uuid);
     }
 
-    /** Мотод конвертирует ClientEntity в Client
+    /** Метод проверяет существует ли клиент с переданным идентификатором
+     * @param uuid идентификатор клиента
+     */
+    private void checkClientExistenceByUUID(UUID uuid) {
+        if (!clientRepository.containsClientWithUUID(uuid)) {
+            throw new RuntimeException("Client not found");
+        }
+    }
+
+    /** Мeтод конвертирует ClientEntity в Client
      * @param entity объект-источник
      * @return Client
      */
