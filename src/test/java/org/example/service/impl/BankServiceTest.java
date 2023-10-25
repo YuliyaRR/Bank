@@ -63,6 +63,8 @@ public class BankServiceTest {
                 .toList();
 
         assertEquals(expectedBankList, allBanks);
+
+        verify(bankRepository, times(1)).getAllBanks();
     }
 
     @Test
