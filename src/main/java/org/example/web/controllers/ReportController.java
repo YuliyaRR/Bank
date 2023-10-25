@@ -27,6 +27,7 @@ public class ReportController extends HttpServlet {
     private final static String REPORT_TYPE = "report_type";
     private final static String REPORT_DATE_FROM = "from";
     private final static String REPORT_DATE_TO = "to";
+    private final static String REPORT_DATE_START = "start";
 
 
     public ReportController() {
@@ -48,7 +49,10 @@ public class ReportController extends HttpServlet {
             if (reportType.equals(ReportType.ACCOUNT_STATEMENT)) {
                 Duration duration = Duration.valueOf(req.getParameter(REPORT_DURATION));
 
-                AccountStatement accountStatement = reportService.getAccountStatement(uuid, duration);
+                String dateStart = req.getParameter(REPORT_DATE_START);
+                LocalDate date = parseDate(dateStart);
+
+                AccountStatement accountStatement = reportService.getAccountStatement(uuid, duration, date);
                 writer.write(mapper.writeValueAsString(accountStatement));
 
             } else if (reportType.equals(ReportType.MONEY_STATEMENT)) {

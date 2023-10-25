@@ -30,21 +30,23 @@ public class ReportService implements IReportService {
     /**
      * Метод формирует выписку по счету за заданный период времени. Выписки формируются только для клиентов Clever-Bank
      * @param account счет, по которому будет сформирована выписка по счету
-     * @param duration продолжительность, за которую нужно составить документ.
-     * Доступные варианты: месяц, год, весь период обслуживания.
+     * @param duration продолжительность, за которую нужно составить документ
+     * @param dateLast последняя дата периода, за который будет сформирован отчет
+     * Доступные варианты продолжительности: месяц, год, весь период обслуживания.
      * @return выписка по счету клиента
      */
     @Override
-    public AccountStatement getAccountStatement(UUID account, Duration duration) {
+    public AccountStatement getAccountStatement(UUID account, Duration duration, LocalDate dateLast) {
+        checkDate(dateLast);
+
         Account accountInfo = accountService.getAccountInfo(account);
         LocalDate dateOpen = accountInfo.getDateOpen();
 
         checkBank(accountInfo.getBank());
 
-        LocalDate dateFrom = getSearchStartDay(duration, dateOpen);
-        LocalDate dateTo = LocalDate.now();
+        LocalDate dateFrom = getSearchStartDay(duration, dateOpen, dateLast);
 
-        Period period = new Period(dateFrom, dateTo);
+        Period period = new Period(dateFrom, dateLast);
 
         List<Transaction> transactionList = transactionService.allAccountTransactions(account, period);
 
@@ -63,7 +65,7 @@ public class ReportService implements IReportService {
 
     @Override
     public MoneyStatement getMoneyStatement(UUID account, Period period) {
-        checkDate(period);
+        checkPeriod(period);
 
         Account accountInfo = accountService.getAccountInfo(account);
 
@@ -87,9 +89,18 @@ public class ReportService implements IReportService {
         return moneyStatement;
     }
 
+    /**Метод проверяет предшествует ли переденная дата текущей дате
+     * @param date дата для проверки
+     */
+    private void checkDate(LocalDate date) {
+        if(date.isAfter(LocalDate.now())) {
+            throw new RuntimeException("The date can't be later than the current date");
+        }
+    }
+
     /** Метод проверяет, является ли банк клиента - Clever-Bank'ом
      * @param bank банк клиента
-     * В случае, елси переданный банк - не Clever-Bank, выбрасывается RuntimeException
+     * В случае, если переданный банк - не Clever-Bank, выбрасывается RuntimeException
      */
     private void checkBank(Bank bank) {
         if (!bank.getName().equals(properties.getProperty(BANK_NAME))) {
@@ -102,14 +113,13 @@ public class ReportService implements IReportService {
      * @param dateOpen дата открытия счета
      * @return дата начала выборки
      */
-    private LocalDate getSearchStartDay(Duration duration, LocalDate dateOpen) {
-        LocalDate now = LocalDate.now();
+    private LocalDate getSearchStartDay(Duration duration, LocalDate dateOpen, LocalDate lastDay) {
         LocalDate from;
 
         if (duration == Duration.MONTH) {
-            from = now.minusMonths(1);
+            from = lastDay.minusMonths(1);
         } else if (duration == Duration.YEAR) {
-            from = now.minusYears(1);
+            from = lastDay.minusYears(1);
         } else {
             from = dateOpen;
         }
@@ -121,14 +131,12 @@ public class ReportService implements IReportService {
         return from;
     }
 
-    private void checkDate(Period period) {
-        LocalDate now = LocalDate.now();
+    private void checkPeriod(Period period) {
         LocalDate from = period.getDateFrom();
         LocalDate to = period.getDateTo();
 
-        if (from.isAfter(now) || to.isAfter(now)) {
-            throw new RuntimeException("The date can't be later than the current date");
-        }
+        checkDate(from);
+        checkDate(to);
 
         if(from.isAfter(to)) {
             throw new RuntimeException("Invalid time period");
