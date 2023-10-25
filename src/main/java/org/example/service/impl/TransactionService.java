@@ -31,7 +31,7 @@ public class TransactionService implements ITransactionService {
     public void saveMonthlyInterestTransactions(List<Transaction> transactions) {
         transactionRepository.saveMonthlyInterestTransactions(
                 transactions.stream()
-                .map(transaction -> convertToEntity(transaction))
+                .map(this::convertToEntity)
                 .toList()
         );
     }
@@ -46,7 +46,7 @@ public class TransactionService implements ITransactionService {
         List<TransactionEntity> entities = transactionRepository.allAccountTransactions(account, period);
 
         return entities.stream()
-                .map(entity -> convertToDto(entity))
+                .map(this::convertToDto)
                 .toList();
     }
 
@@ -61,7 +61,7 @@ public class TransactionService implements ITransactionService {
         return transactionRepository.getSumInfoAboutTransactions(account, period);
     }
 
-    /** Мотод конвертирует dto Transaction в TransactionEntity
+    /** Метод конвертирует dto Transaction в TransactionEntity
      * @param transaction объект-источник
      * @return TransactionEntity
      */
@@ -77,7 +77,7 @@ public class TransactionService implements ITransactionService {
                 .build();
     }
 
-    /** Мотод конвертирует TransactionEntity в Transaction
+    /** Метод конвертирует TransactionEntity в Transaction
      * @param entity объект-источник
      * @return Transaction
      */
