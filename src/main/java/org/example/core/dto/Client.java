@@ -16,4 +16,8 @@ import java.util.UUID;
 public class Client {
     private UUID id;
     private String name;
+
+    public Client(String name) {
+        this.name = name;
+    }
 }

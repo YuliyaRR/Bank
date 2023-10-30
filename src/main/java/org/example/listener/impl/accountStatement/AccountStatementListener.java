@@ -1,5 +1,6 @@
 package org.example.listener.impl.accountStatement;
 
+import lombok.RequiredArgsConstructor;
 import org.example.core.events.AccountStatementEvent;
 import org.example.listener.api.IListener;
 import org.example.service.api.IDocCreationService;
@@ -7,6 +8,7 @@ import org.example.service.factory.DocCreationServiceSingleton;
 
 import java.beans.PropertyVetoException;
 import java.util.List;
+@RequiredArgsConstructor
 public class AccountStatementListener implements IListener<AccountStatementEvent> {
     private final IDocCreationService docCreationService;
 

@@ -16,13 +16,16 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.UUID;
 
+import static org.example.util.UtilValidator.*;
+
 @WebServlet(name = "BankController", urlPatterns = "/banks")
 public class BankController extends HttpServlet {
-    private final IBankService bankService;
-    private final ObjectMapper mapper;
+    private IBankService bankService;
+    private ObjectMapper mapper;
     private final static String BANK_UUID = "uuid";
 
-    public BankController() {
+    @Override
+    public void init() throws ServletException {
         this.bankService = BankServiceSingleton.getInstance();
         this.mapper = ObjectMapperHelperSingleton.getObjectMapper();
     }
@@ -38,7 +41,7 @@ public class BankController extends HttpServlet {
             List<Bank> allBanks = bankService.getAllBanks();
             writer.write(mapper.writeValueAsString(allBanks));
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             if (e.getCause() != null) {
                 writer.write(e.getMessage() + ": " + e.getCause());
             } else {
@@ -54,12 +57,12 @@ public class BankController extends HttpServlet {
 
         PrintWriter writer = resp.getWriter();
         try{
-            Bank bank = mapper.readValue(req.getInputStream(), Bank.class);
+            Bank bank = mapper.readValue(req.getReader(), Bank.class);
             checkString(bank.getName());
 
             bankService.createBank(bank);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             if (e.getCause() != null) {
                 writer.write(e.getMessage() + ": " + e.getCause());
             } else {
@@ -76,13 +79,15 @@ public class BankController extends HttpServlet {
         PrintWriter writer = resp.getWriter();
 
         try {
-            UUID uuid = UUID.fromString(req.getParameter(BANK_UUID));
-            Bank bank = mapper.readValue(req.getInputStream(), Bank.class);
+            String parameterUUID = req.getParameter(BANK_UUID);
+            UUID uuid = checkUUIDParameter(parameterUUID);
+
+            Bank bank = mapper.readValue(req.getReader(), Bank.class);
             checkString(bank.getName());
 
             bankService.updateBank(uuid, bank);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             if (e.getCause() != null) {
                 writer.write(e.getMessage() + ": " + e.getCause());
             } else {
@@ -99,23 +104,17 @@ public class BankController extends HttpServlet {
 
         PrintWriter writer = resp.getWriter();
         try {
-            UUID uuid = UUID.fromString(req.getParameter(BANK_UUID));
+            String parameterUUID = req.getParameter(BANK_UUID);
+            UUID uuid = checkUUIDParameter(parameterUUID);
 
             bankService.deleteBank(uuid);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             if (e.getCause() != null) {
                 writer.write(e.getMessage() + ": " + e.getCause());
             } else {
                 writer.write(e.getMessage());
             }
-        }
-
-    }
-
-    private void checkString(String str) {
-        if(str.isEmpty() || str.isBlank()) {
-            throw new RuntimeException("Data not entered");
         }
     }
 }

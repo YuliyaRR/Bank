@@ -23,6 +23,7 @@ public class ClientRepository implements IClientRepository {
     private final static String INSERT_NEW_CLIENT = "SQL_INSERT_NEW_CLIENT";
     private final static String UPDATE_CLIENT = "SQL_UPDATE_CLIENT";
     private final static String DELETE_CLIENT = "SQL_DELETE_CLIENT";
+    private final static String SELECT_CLIENT_BY_UUID = "SQL_SELECT_CLIENT_BY_ID";
 
     /**
      * Метод возвращает информацию обо всех клиентах
@@ -109,6 +110,21 @@ public class ClientRepository implements IClientRepository {
             if(update != 1) {
                 throw new RuntimeException("Something went wrong. Client wasn't deleted.");// TODO custom exception
             }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Database connection error", e);// TODO custom exception
+        }
+    }
+
+    @Override
+    public boolean containsClientWithUUID(UUID id) {
+        try(Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(properties.getProperty(SELECT_CLIENT_BY_UUID))) {
+
+            preparedStatement.setObject(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            return resultSet.next();
 
         } catch (SQLException e) {
             throw new RuntimeException("Database connection error", e);// TODO custom exception

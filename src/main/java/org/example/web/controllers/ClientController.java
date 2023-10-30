@@ -16,15 +16,18 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.UUID;
 
+import static org.example.util.UtilValidator.*;
+
 @WebServlet(name = "ClientController", urlPatterns = "/clients")
 public class ClientController extends HttpServlet {
-    private final IClientService clientService;
-    private final ObjectMapper mapper;
+    private IClientService clientService;
+    private ObjectMapper mapper;
     private final static String CLIENT_ID = "id";
 
-    public ClientController() {
-        this.clientService = ClientServiceSingleton.getInstance();
-        this.mapper = ObjectMapperHelperSingleton.getObjectMapper();
+    @Override
+    public void init() throws ServletException {
+        clientService = ClientServiceSingleton.getInstance();
+        mapper = ObjectMapperHelperSingleton.getObjectMapper();
     }
 
     @Override
@@ -37,8 +40,7 @@ public class ClientController extends HttpServlet {
         try {
             List<Client> allClients = clientService.getAllClients();
             writer.write(mapper.writeValueAsString(allClients));
-
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             if (e.getCause() != null) {
                 writer.write(e.getMessage() + ": " + e.getCause());
             } else {
@@ -54,12 +56,12 @@ public class ClientController extends HttpServlet {
 
         PrintWriter writer = resp.getWriter();
         try{
-            Client client = mapper.readValue(req.getInputStream(), Client.class);
+            Client client = mapper.readValue(req.getReader(), Client.class);
             checkString(client.getName());
 
             clientService.createClient(client);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             if (e.getCause() != null) {
                 writer.write(e.getMessage() + ": " + e.getCause());
             } else {
@@ -76,13 +78,16 @@ public class ClientController extends HttpServlet {
         PrintWriter writer = resp.getWriter();
 
         try {
-            UUID uuid = UUID.fromString(req.getParameter(CLIENT_ID));
-            Client client = mapper.readValue(req.getInputStream(), Client.class);
+            String parameterUUID = req.getParameter(CLIENT_ID);
+            UUID uuid = checkUUIDParameter(parameterUUID);
+
+            Client client = mapper.readValue(req.getReader(), Client.class);
+
             checkString(client.getName());
 
             clientService.updateClient(uuid, client);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             if (e.getCause() != null) {
                 writer.write(e.getMessage() + ": " + e.getCause());
             } else {
@@ -99,11 +104,12 @@ public class ClientController extends HttpServlet {
 
         PrintWriter writer = resp.getWriter();
         try {
-            UUID uuid = UUID.fromString(req.getParameter(CLIENT_ID));
+            String parameterUUID = req.getParameter(CLIENT_ID);
+            UUID uuid = checkUUIDParameter(parameterUUID);
 
             clientService.deleteClient(uuid);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             if (e.getCause() != null) {
                 writer.write(e.getMessage() + ": " + e.getCause());
             } else {
@@ -111,11 +117,5 @@ public class ClientController extends HttpServlet {
             }
         }
 
-    }
-
-    private void checkString(String str) {
-        if(str.isEmpty() || str.isBlank()) {
-            throw new RuntimeException("Data not entered");
-        }
     }
 }

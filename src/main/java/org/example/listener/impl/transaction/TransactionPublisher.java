@@ -1,12 +1,13 @@
 package org.example.listener.impl.transaction;
 
+import lombok.RequiredArgsConstructor;
 import org.example.core.events.TransactionEvent;
 import org.example.listener.api.IListener;
 import org.example.listener.api.IPublisher;
 
 import java.util.List;
 
-
+@RequiredArgsConstructor
 public class TransactionPublisher implements IPublisher<TransactionEvent> {
     private final IListener<TransactionEvent> listener;
 
