@@ -1,12 +1,13 @@
 package org.example.listener.impl.moneyStatement;
 
+import lombok.RequiredArgsConstructor;
 import org.example.core.events.MoneyStatementEvent;
 import org.example.listener.api.IListener;
 import org.example.listener.api.IPublisher;
 
 import java.util.List;
 
-
+@RequiredArgsConstructor
 public class MoneyStatementPublisher implements IPublisher<MoneyStatementEvent> {
     private final IListener<MoneyStatementEvent> listener;
 

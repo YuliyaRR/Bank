@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@NoArgsConstructor
 public class MoneyStatement {
     private Account account;
     private Period period;
