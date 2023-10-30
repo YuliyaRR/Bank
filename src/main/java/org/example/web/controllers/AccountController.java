@@ -14,14 +14,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.UUID;
+
+import static org.example.util.UtilValidator.*;
 
 @WebServlet(name = "AccountController", urlPatterns = "/accounts")
 public class AccountController extends HttpServlet {
-    private final IAccountService accountService;
-    private final ObjectMapper mapper;
+    private IAccountService accountService;
+    private ObjectMapper mapper;
 
-    public AccountController() {
+    @Override
+    public void init() throws ServletException {
         this.accountService = AccountServiceSingleton.getInstance();
         this.mapper = ObjectMapperHelperSingleton.getObjectMapper();
     }
@@ -34,7 +36,7 @@ public class AccountController extends HttpServlet {
         PrintWriter writer = resp.getWriter();
 
         try {
-            Transaction transaction = mapper.readValue(req.getInputStream(), Transaction.class);
+            Transaction transaction = mapper.readValue(req.getReader(), Transaction.class);
 
             double sum = transaction.getSum();
 
@@ -46,16 +48,16 @@ public class AccountController extends HttpServlet {
 
             switch (transaction.getType()) {
                 case WITHDRAWALS -> {
-                    checkFormatUUIDAccount(transaction.getAccountFrom());
+                    checkUUIDAccountBody(transaction.getAccountFrom());
                     check = accountService.withdrawalMoney(transaction);
                 }
                 case CASH_REPLENISHMENT -> {
-                    checkFormatUUIDAccount(transaction.getAccountTo());
+                    checkUUIDAccountBody(transaction.getAccountTo());
                     check = accountService.addMoney(transaction);
                 }
                 case WAGE, MONEY_TRANSFER, PAYMENT_FOR_SERVICES -> {
-                    checkFormatUUIDAccount(transaction.getAccountFrom());
-                    checkFormatUUIDAccount(transaction.getAccountTo());
+                    checkUUIDAccountBody(transaction.getAccountFrom());
+                    checkUUIDAccountBody(transaction.getAccountTo());
                     check = accountService.transferMoney(transaction);
                 }
                 default -> throw new RuntimeException("The requested operations aren't currently supported");
@@ -63,18 +65,12 @@ public class AccountController extends HttpServlet {
 
             writer.write(mapper.writeValueAsString(check));
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             if (e.getCause() != null) {
                 writer.write(e.getMessage() + ": " + e.getCause());
             } else {
                 writer.write(e.getMessage());
             }
-        }
-    }
-
-    private void checkFormatUUIDAccount(UUID account) {
-        if(account.toString().isEmpty() || account.toString().isBlank()) {
-            throw new RuntimeException("Enter an account");
         }
     }
 }

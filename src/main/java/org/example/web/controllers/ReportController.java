@@ -18,10 +18,12 @@ import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import static org.example.util.UtilValidator.*;
+
 @WebServlet(name = "ReportController", urlPatterns = "/reports")
 public class ReportController extends HttpServlet {
-    private final IReportService reportService;
-    private final ObjectMapper mapper;
+    private IReportService reportService;
+    private ObjectMapper mapper;
     private final static String REPORT_DURATION = "duration";
     private final static String REPORT_ACCOUNT = "account";
     private final static String REPORT_TYPE = "report_type";
@@ -29,8 +31,8 @@ public class ReportController extends HttpServlet {
     private final static String REPORT_DATE_TO = "to";
     private final static String REPORT_DATE_START = "start";
 
-
-    public ReportController() {
+    @Override
+    public void init() throws ServletException {
         this.reportService = ReportServiceSingleton.getInstance();
         this.mapper = ObjectMapperHelperSingleton.getObjectMapper();
     }
@@ -43,13 +45,20 @@ public class ReportController extends HttpServlet {
         PrintWriter writer = resp.getWriter();
 
         try {
-            UUID uuid = UUID.fromString(req.getParameter(REPORT_ACCOUNT));
-            ReportType reportType = ReportType.valueOf(req.getParameter(REPORT_TYPE));
+            String parameterUUID = req.getParameter(REPORT_ACCOUNT);
+            UUID uuid = checkUUIDParameter(parameterUUID);
+
+            String parameterReportType = req.getParameter(REPORT_TYPE);
+            checkString(parameterReportType);
+            ReportType reportType = ReportType.valueOf(parameterReportType);
 
             if (reportType.equals(ReportType.ACCOUNT_STATEMENT)) {
-                Duration duration = Duration.valueOf(req.getParameter(REPORT_DURATION));
+                String parameterReportDuration = req.getParameter(REPORT_DURATION);
+                checkString(parameterReportDuration);
+                Duration duration = Duration.valueOf(parameterReportDuration);
 
                 String dateStart = req.getParameter(REPORT_DATE_START);
+                checkString(dateStart);
                 LocalDate date = parseDate(dateStart);
 
                 AccountStatement accountStatement = reportService.getAccountStatement(uuid, duration, date);
@@ -57,9 +66,11 @@ public class ReportController extends HttpServlet {
 
             } else if (reportType.equals(ReportType.MONEY_STATEMENT)) {
                 String parameterDateFrom = req.getParameter(REPORT_DATE_FROM);
+                checkString(parameterDateFrom);
                 LocalDate dateFrom = parseDate(parameterDateFrom);
 
                 String parameterDateTo = req.getParameter(REPORT_DATE_TO);
+                checkString(parameterDateTo);
                 LocalDate dateTo = parseDate(parameterDateTo);
 
                 Period period = new Period(dateFrom, dateTo);
@@ -74,12 +85,5 @@ public class ReportController extends HttpServlet {
                 writer.write(e.getMessage());
             }
         }
-    }
-
-    private LocalDate parseDate(String date) {
-        if (date == null) {
-            throw new IllegalArgumentException("The date of the reporting period is not specified");
-        }
-        return LocalDate.parse(date);
     }
 }
